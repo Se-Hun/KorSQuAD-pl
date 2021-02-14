@@ -130,3 +130,10 @@ dmypy.json
 
 # For Pycharm Dependencies
 .idea/
+
+# For dataset
+*.json
+
+# For model
+model/
+lightning_logs/
