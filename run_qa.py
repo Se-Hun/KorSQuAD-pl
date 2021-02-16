@@ -12,6 +12,7 @@ from pytorch_lightning.callbacks import EarlyStopping
 from sklearn.metrics import accuracy_score
 from datasets import load_metric
 # from transformers.data.metrics import squad_metrics as metric
+from utils_squad_evaluate import EVAL_OPTS, main as evaluate_on_squad
 
 class QuestionAnswering(pl.LightningModule):
     def __init__(self,
@@ -40,7 +41,8 @@ class QuestionAnswering(pl.LightningModule):
 
     def forward(self, x):
         # if text_reader model is BERT, x values are consist of
-        # input_ids, token_type_ids, attention_mask, start_positions, end_positions !
+        # input_ids, token_type_ids, attention_mask, start_positions, end_positions ! <-- In case of Train dataset
+        # input_ids, token_type_ids, attention_mask ! <-- In case of Test(valid) dataset
 
         return self.text_reader(**x)
 
@@ -59,8 +61,8 @@ class QuestionAnswering(pl.LightningModule):
         start_logits = outputs[1]
         end_logits = outputs[2]
 
-        start_preds = start_logits.argmax(dim=1)
-        end_preds = end_logits.argmax(dim=1)
+        start_preds = start_logits.argmax(dim=-1)
+        end_preds = end_logits.argmax(dim=-1)
 
         start_labels = batch["start_positions"]
         end_labels = batch["end_positions"]
@@ -76,13 +78,11 @@ class QuestionAnswering(pl.LightningModule):
         end_labels = torch.cat([x["end_labels"] for x in outputs]).cpu().numpy()
         loss = torch.stack([x["loss"] for x in outputs]).mean()
 
-        # start_labels, end_labels = np.array(start_labels), np.array(end_labels)
         val_acc_start = accuracy_score(start_labels, start_preds)
         val_acc_end = accuracy_score(end_labels, end_preds)
         val_acc = (val_acc_start + val_acc_end) / 2
 
-        # self.metric.compute(predictions=predictions, references=label_ids)
-
+        # validation accuracy is not exact... --> so, If you wanna exact performances, activate to "do_eval" Argument
         self.log("val_loss", loss, prog_bar=True)
         self.log("val_acc", val_acc, prog_bar=True)
         return loss
@@ -90,24 +90,31 @@ class QuestionAnswering(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         outputs = self(batch)
 
+        loss = outputs[0]
         start_logits = outputs[1]
         end_logits = outputs[2]
 
-        start_preds = start_logits.argmax(dim=1)
-        end_preds = end_logits.argmax(dim=1)
+        # batch_size = start_logits.size(0)
+        # example_id = torch.arange((batch_idx + 1) * batch_size, dtype=torch.long)
+
+        start_preds = start_logits.argmax(dim=-1)
+        end_preds = end_logits.argmax(dim=-1)
 
         start_labels = batch["start_positions"]
         end_labels = batch["end_positions"]
 
         result = {"start_preds": start_preds, "end_preds": end_preds,
                   "start_labels": start_labels, "end_labels": end_labels}
+        # result = {"start_logits": start_logits, "end_logits": end_logits, "example_id": example_id}
         return result
 
     def test_epoch_end(self, outputs):
-        start_preds = torch.cat([x["start_preds"] for x in outputs]).cpu().numpy()
-        end_preds = torch.cat([x["end_preds"] for x in outputs]).cpu().numpy()
-        start_labels = torch.cat([x["start_labels"] for x in outputs]).cpu().numpy()
-        end_labels = torch.cat([x["end_labels"] for x in outputs]).cpu().numpy()
+        start_logits = torch.cat([x["start_logits"] for x in outputs]).cpu().numpy()
+        end_logits = torch.cat([x["end_logits"] for x in outputs]).cpu().numpy()
+        # start_preds = torch.cat([x["start_preds"] for x in outputs]).cpu().numpy()
+        # end_preds = torch.cat([x["end_preds"] for x in outputs]).cpu().numpy()
+        # start_labels = torch.cat([x["start_labels"] for x in outputs]).cpu().numpy()
+        # end_labels = torch.cat([x["end_labels"] for x in outputs]).cpu().numpy()
 
         correct_count = torch.sum(labels == preds)
         test_acc = correct_count.float() / float(len(labels))
@@ -129,6 +136,7 @@ class QuestionAnswering(pl.LightningModule):
             print("Predicted Outputs are dumped at {}".format(predicted_outputs_fn))
 
         self.log("test_acc", test_acc, prog_bar=True)
+
         return test_acc
 
     def configure_optimizers(self):
