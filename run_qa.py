@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping
 
 from sklearn.metrics import accuracy_score
-from datasets import load_metric
+# from datasets import load_metric
 # from transformers.data.metrics import squad_metrics as metric
 from utils_squad_evaluate import EVAL_OPTS, main as evaluate_on_squad
 
@@ -28,7 +28,7 @@ class QuestionAnswering(pl.LightningModule):
         self.text_reader = text_reader
 
         # prepare metric
-        self.metric = load_metric(data_name)
+        # self.metric = load_metric(data_name)
 
     # def forward(self, input_ids, token_type_ids, attention_mask, start_positions, end_positions):
     #     outputs = self.text_reader(input_ids=input_ids,
@@ -195,9 +195,13 @@ def main():
     # ------------------------------------------------------------------------------------------------------------------
 
     # Dataset ----------------------------------------------------------------------------------------------------------
-    from dataset import QuestionAnswering_Data_Module
+    # from dataset import QuestionAnswering_Data_Module
+    # dm = QuestionAnswering_Data_Module(args.data_name, args.text_reader, args.max_seq_length, args.batch_size)
+    # dm.prepare_data()
+    from dataset2 import QuestionAnswering_Data_Module
     dm = QuestionAnswering_Data_Module(args.data_name, args.text_reader, args.max_seq_length, args.batch_size)
     dm.prepare_data()
+
     # ------------------------------------------------------------------------------------------------------------------
 
     # Model Checkpoint -------------------------------------------------------------------------------------------------
