@@ -259,7 +259,7 @@ def main():
                         help="Path to pre-trained model or shortcut name selected in the list: " + ", ".join(MODEL_CLASSES.keys()))
 
     # Other parameters
-    parser.add_argument("--data_name", default="squad_v2", type=str,
+    parser.add_argument("--data_name", default="squad_v2.0", type=str,
                         help="Data Name selected in the list: " + ", ".join(DATA_NAMES))
     parser.add_argument("--null_score_diff_threshold", type=float, default=0.0,
                         help="If null_score - best_non_null is greater than the threshold predict null.")
@@ -343,7 +343,8 @@ def main():
     # Do eval !
     if args.do_eval:
         model_files = glob(os.path.join(model_folder, '*.ckpt'))
-        best_fn = model_files[-1]
+        best_fn = model_files[0] # -1
+        print("[Evaluation] Best Model File name is {}".format(best_fn))
         model = QuestionAnswering.load_from_checkpoint(best_fn)
         trainer.test(model, datamodule=dm)
 

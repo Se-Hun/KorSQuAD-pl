@@ -6,13 +6,13 @@ import pytorch_lightning as pl
 from transformers import squad_convert_examples_to_features
 from transformers.data.processors.squad import SquadV1Processor, SquadV2Processor
 
-DATA_NAMES = ["squad_v1", "korquad_v1", "squad_v2", "korquad_v2"]
+DATA_NAMES = ["squad_v1.1", "korquad_v1", "squad_v2.0", "korquad_v2"]
 
 # Data Utils -----------------------------------------------------------------------------------------------------------
 def is_squad_version_2(data_name):
-    if data_name in ["squad_v2", "korquad_v2"]:
+    if data_name in ["squad_v2.0", "korquad_v2"]:
         return True
-    elif data_name in ["squad_v1", "korquad_v1"]:
+    elif data_name in ["squad_v1.1", "korquad_v1"]:
         return False
     else:
         raise KeyError(data_name)
@@ -58,6 +58,7 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
         test_dataset, test_examples, test_features = self.load_squad_examples(mode="test")
 
         self.train_dataset = train_dataset # Comment out this code for debugging.
+        # self.train_dataset = val_dataset # Uncomment out below code for debugging.
         self.val_dataset = val_dataset
         self.test_dataset = test_dataset
 
