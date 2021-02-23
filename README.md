@@ -51,11 +51,21 @@ $ python3 run_squad.py --model_type bert \
 ```
 
 ### 2. Evaluation
-
+```bash
+~~~
+```
 
 ## Results
 
+|                         | Exact Match (%) | F1 Score (%) |
+| ----------------------- | --------------- | ------------ |
+| ~~                  | ~~           | ~~        |
+| ~~            | ~~           | ~~        |
+| ~~       | ~~           | ~~        |
+| ~~ | ~~           | ~~        |
+
 ## TODO list
+
 - [x] SQuAD 데이터셋 다운로드 코드
 - [ ] KorQuAD 데이터셋 다운로드 코드
 - [x] SQuAD 1.1, 2.0
@@ -65,3 +75,13 @@ $ python3 run_squad.py --model_type bert \
 - [ ] ReadME 작성
 
 ## References
+
+- [KoBERT](https://github.com/SKTBrain/KoBERT)
+- [Huggingface Transformers](https://github.com/huggingface/transformers)
+- [KorQuAD](https://korquad.github.io/category/1.0_KOR.html)
+- [KorQuAD by graykode](https://github.com/graykode/KorQuAD-beginner)
+- [KorQuAD by lyeoni](https://github.com/lyeoni/KorQuAD)
+- [KoBert shows low performance on KorQuad](https://github.com/SKTBrain/KoBERT/issues/1)
+- [KoBERT-KorQuAD by monologg](https://github.com/monologg/KoBERT-KorQuAD)
+- [SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)
+- [NVIDIA NeMo](https://github.com/NVIDIA/NeMo)
