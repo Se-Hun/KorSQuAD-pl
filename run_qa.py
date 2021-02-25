@@ -348,6 +348,7 @@ def main():
     if args.do_train:
         model = QuestionAnswering(args.data_name, args.model_type, args.model_name_or_path, args.do_lower_case, args.lang_id,
                                   args.n_best_size, args.max_answer_length, args.null_score_diff_threshold)
+        dm.setup('train')
         trainer.fit(model, dm)
 
     # Do eval !
@@ -356,6 +357,7 @@ def main():
         best_fn = model_files[-1]
         print("[Evaluation] Best Model File name is {}".format(best_fn))
         model = QuestionAnswering.load_from_checkpoint(best_fn)
+        dm.setup('test')
         trainer.test(model, datamodule=dm)
 
 if __name__ == '__main__':

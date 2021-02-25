@@ -36,12 +36,9 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
         if self.data_name not in DATA_NAMES:
             raise NotImplementedError(data_name) # validation about dataset name
 
-        # prepare tokenizer
-        from utils.models import get_tokenizer
-        self.tokenizer = get_tokenizer(model_type, model_name_or_path, do_lower_case)
-
-        # store data configurations
-        self.data_dir = os.path.join("./data", self.data_name)
+        self.model_type = model_type
+        self.model_name_or_path = model_name_or_path
+        self.do_lower_case = do_lower_case
 
         self.max_seq_length = max_seq_length
         self.doc_stride = doc_stride
@@ -52,19 +49,33 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
         # store batch size
         self.batch_size = batch_size
 
+    def setup(self, stage=None):
+        # Assign train/val datasets for use in dataloaders
+        if stage == "train" or stage is None:
+            train_dataset = self.load_squad_examples(mode="train")  # Comment out this code for debugging.
+            val_dataset = self.load_squad_examples(mode="dev")
+
+            self.train_dataset = train_dataset  # Comment out this code for debugging.
+            # self.train_dataset = val_dataset # Uncomment out below code for debugging.
+            self.val_dataset = val_dataset
+
+        # Assign test dataset for use in dataloader(s)
+        if stage == 'test' or stage is None:
+            test_dataset, test_examples, test_features = self.load_squad_examples(mode="test")
+
+            self.test_dataset = test_dataset
+
+            # For Evaluating with Formal SQuAD and KorQuAD Metrics
+            self.test_examples = test_examples
+            self.test_features = test_features
+
     def prepare_data(self):
-        train_dataset = self.load_squad_examples(mode="train") # Comment out this code for debugging.
-        val_dataset = self.load_squad_examples(mode="dev")
-        test_dataset, test_examples, test_features = self.load_squad_examples(mode="test")
+        # prepare tokenizer
+        from utils.models import get_tokenizer
+        self.tokenizer = get_tokenizer(self.model_type, self.model_name_or_path, self.do_lower_case)
 
-        self.train_dataset = train_dataset # Comment out this code for debugging.
-        # self.train_dataset = val_dataset # Uncomment out below code for debugging.
-        self.val_dataset = val_dataset
-        self.test_dataset = test_dataset
-
-        # For Evaluating with Formal SQuAD and KorQuAD Metrics
-        self.test_examples = test_examples
-        self.test_features = test_features
+        # store data configurations
+        self.data_dir = os.path.join("./data", self.data_name)
 
     def load_squad_examples(self, mode="train"):
         if self.data_dir:
