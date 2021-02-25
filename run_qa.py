@@ -225,18 +225,28 @@ class QuestionAnswering(pl.LightningModule):
     def configure_optimizers(self):
         from transformers import AdamW
 
-        param_optimizer = list(self.named_parameters())
-        no_decay = ['bias', 'gamma', 'beta']
+        # param_optimizer = list(self.named_parameters())
+        # no_decay = ['bias', 'gamma', 'beta']
+        # optimizer_grouped_parameters = [
+        #     {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)],
+        #      'weight_decay_rate': 0.01},
+        #     {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
+        #      'weight_decay_rate': 0.0}
+        # ]
+        # optimizer = AdamW(
+        #     optimizer_grouped_parameters,
+        #     lr=self.hparams.learning_rate,
+        # )
+        no_decay = ["bias", "LayerNorm.weight"]
         optimizer_grouped_parameters = [
-            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)],
-             'weight_decay_rate': 0.01},
-            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
-             'weight_decay_rate': 0.0}
+            {
+                "params": [p for n, p in self.named_parameters() if not any(nd in n for nd in no_decay)],
+                "weight_decay": 0.0,
+            },
+            {"params": [p for n, p in self.named_parameters() if any(nd in n for nd in no_decay)],
+             "weight_decay": 0.0},
         ]
-        optimizer = AdamW(
-            optimizer_grouped_parameters,
-            lr=self.hparams.learning_rate,
-        )
+        optimizer = AdamW(optimizer_grouped_parameters, lr=self.hparams.learning_rate, eps=1e-8)
         return optimizer
 
     @staticmethod
@@ -343,7 +353,7 @@ def main():
     # Do eval !
     if args.do_eval:
         model_files = glob(os.path.join(model_folder, '*.ckpt'))
-        best_fn = model_files[0] # -1
+        best_fn = model_files[-1]
         print("[Evaluation] Best Model File name is {}".format(best_fn))
         model = QuestionAnswering.load_from_checkpoint(best_fn)
         trainer.test(model, datamodule=dm)
