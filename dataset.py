@@ -49,6 +49,14 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
         # store batch size
         self.batch_size = batch_size
 
+    def prepare_data(self):
+        # prepare tokenizer
+        from utils.models import get_tokenizer
+        self.tokenizer = get_tokenizer(self.model_type, self.model_name_or_path, self.do_lower_case)
+
+        # store data configurations
+        self.data_dir = os.path.join("./data", self.data_name)
+
     def setup(self, stage=None):
         # Assign train/val datasets for use in dataloaders
         if stage == "train" or stage is None:
@@ -68,14 +76,6 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
             # For Evaluating with Formal SQuAD and KorQuAD Metrics
             self.test_examples = test_examples
             self.test_features = test_features
-
-    def prepare_data(self):
-        # prepare tokenizer
-        from utils.models import get_tokenizer
-        self.tokenizer = get_tokenizer(self.model_type, self.model_name_or_path, self.do_lower_case)
-
-        # store data configurations
-        self.data_dir = os.path.join("./data", self.data_name)
 
     def load_squad_examples(self, mode="train"):
         if self.data_dir:
@@ -104,7 +104,7 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
                 max_query_length=self.max_query_length,
                 is_training=is_training,
                 return_dataset="pt", # Return DataType is Pytorch Tensor !
-                threads=2,
+                threads=2
             )
 
         if not is_training:

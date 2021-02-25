@@ -170,11 +170,11 @@ class QuestionAnswering(pl.LightningModule):
             all_results.append(result)
 
         # Compute predictions
-        output_prediction_file = os.path.join(self.trainer.callbacks[1].dirpath, "predictions_eval.json")
-        output_nbest_file = os.path.join(self.trainer.callbacks[1].dirpath, "nbest_predictions_eval.json")
+        output_prediction_file = os.path.join(self.trainer.checkpoint_callback.dirpath, "predictions_eval.json")
+        output_nbest_file = os.path.join(self.trainer.checkpoint_callback.dirpath, "nbest_predictions_eval.json")
 
         if self.version_2_with_negative:
-            output_null_log_odds_file = os.path.join(self.trainer.callbacks[1].dirpath, "null_odds_eval.json")
+            output_null_log_odds_file = os.path.join(self.trainer.checkpoint_callback.dirpath, "null_odds_eval.json")
         else:
             output_null_log_odds_file = None
 
@@ -324,6 +324,7 @@ def main():
     from pytorch_lightning.callbacks import ModelCheckpoint
     model_folder = './model/{}/{}'.format(args.data_name, args.model_type)
     checkpoint_callback = ModelCheckpoint(monitor='val_loss',
+                                          mode='min', # loss --> minimize ! if you wanna monitor acc, you should change mode is 'max'.
                                           dirpath=model_folder,
                                           filename='{epoch:02d}-{val_loss:.2f}')
     # ------------------------------------------------------------------------------------------------------------------
