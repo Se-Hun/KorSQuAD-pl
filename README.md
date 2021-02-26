@@ -19,17 +19,21 @@ Question & Answering Task에 대한 SOTA 성능을 가졌던 모델들을 Fine-T
 * 영어 데이터 셋 : [SQuAD 1.1](https://rajpurkar.github.io/SQuAD-explorer/explore/1.1/dev/), [SQuAD 2.0](https://rajpurkar.github.io/SQuAD-explorer/)
 
 ### 1. KorQuAD Data Download
-```bash
-~~~
-```
+KorQuAD 데이터셋은 현재 Script를 지원하지 않습니다.
+
+아래의 Page들에서 직접 다운로드한 후, `./data`의 경로에 직접 저장합니다.
+
+[KorQuAD 1.0](https://korquad.github.io/category/1.0_KOR.html), [KorQuAD 2.0](https://korquad.github.io/)
 
 ### 2. SQuAD Data Download
 ```bash
 $ python download_squad.py --download_dir ./data
 ```
 
+위의 명령어를 실행하면 `./data/squad_v1.1`과 `./data/squad_v2.0`의 경로에 데이터가 다운로드 받아짐을 확인할 수 있습니다.
+
 ## Usage
-코드의 경우 Huggingface Transformers의 example 코드의 일부를 수정하여 작성했습니다.
+코드의 경우 Huggingface Transformers의 `run_qa.py` 코드의 일부를 수정하여 작성했습니다.
 
 아래의 명령어들은 모두 SQuAD 2.0 데이터셋에 대해 사전학습된 BERT 모델로 Fine-Tuning을 진행하고 Evaluation을 하도록 하는 예시코드입니다.
 
@@ -38,31 +42,67 @@ $ python download_squad.py --download_dir ./data
 $ python3 run_squad.py --model_type bert \
                        --model_name_or_path bert-base-uncased \
                        --do_lower_case \
-                       --data_dir data \
-                       --train_file KorQuAD_v1.0_train.json \
-                       --predict_file KorQuAD_v1.0_dev.json \
-                       --evaluate_during_training \
-                       --per_gpu_train_batch_size 8 \
-                       --per_gpu_eval_batch_size 8 \
-                       --max_seq_length 512 \
-                       --logging_steps 4000 \
-                       --save_steps 4000 \
-                       --do_train
+                       --data_name squad_v2.0 \
+                       --do_train \
+                       --gpu_id 0 \
+                       --batch_size 12 \
+                       --learning_rate 3e-5
 ```
 
 ### 2. Evaluation
 ```bash
-~~~
+$ python3 run_squad.py --model_type bert \
+                       --model_name_or_path bert-base-uncased \
+                       --do_lower_case \
+                       --data_name squad_v2.0 \
+                       --do_eval \
+                       --gpu_id 0 \
+                       --batch_size 12 \
+                       --learning_rate 3e-5
+```
+
+### 3. Evaluation about KorQuAD 1.0
+
+KorQuAD 1.0에 대한 공식 Evaluation Script를 사용하려면 다음과 같은 명령어를 사용합니다.
+
+```bash
+$ python3 evaluate_v1_0.py ./data/korquad_v1.0/dev.json \
+                           ./model/korquad_v1.0/{$model_type}/predictions_eval.json
 ```
 
 ## Results
 
-|                         | Exact Match (%) | F1 Score (%) |
-| ----------------------- | --------------- | ------------ |
-| ~~                  | ~~           | ~~        |
-| ~~            | ~~           | ~~        |
-| ~~       | ~~           | ~~        |
-| ~~ | ~~           | ~~        |
+### 1. KorQuAD 1.0
+|                                       | Exact Match (%) | F1 Score (%) |
+| ------------------------------------- | --------------- | ------------ |
+| bert-base-multilingual-cased          | ~~              | ~~           |
+| distilbert-base-multilingual-cased    | ~~              | ~~           |
+| monologg/kobert                       | ~~              | ~~           |
+| monologg/koelectra-base-discriminator | ~~              | ~~           |
+
+### 2. KorQuAD 2.0
+|                                       | Exact Match (%) | F1 Score (%) |
+| ------------------------------------- | --------------- | ------------ |
+| bert-base-multilingual-cased          | ~~              | ~~           |
+| distilbert-base-multilingual-cased    | ~~              | ~~           |
+| monologg/kobert                       | ~~              | ~~           |
+| monologg/koelectra-base-discriminator | ~~              | ~~           |
+
+### 3. SQuAD 1.1
+|                                         | Exact Match (%) | F1 Score (%) |
+| --------------------------------------- | --------------- | ------------ |
+| bert-base-uncased                       | 76.20           | 84.79        |
+| distilbert-base-uncased                 | 74.13           | 82.71        |
+| bert-large-uncased                      | ~~              | ~~           |
+| distilbert-base-uncased-distilled-squad | ~~              | ~~           |
+
+### 4. SQuAD 2.0
+|                                         | Exact Match (%) | F1 Score (%) |
+| --------------------------------------- | --------------- | ------------ |
+| bert-base-uncased                       | ~~              | ~~           |
+| distilbert-base-uncased                 | ~~              | ~~           |
+| bert-large-uncased                      | ~~              | ~~           |
+| distilbert-base-uncased-distilled-squad | ~~              | ~~           |
 
 ## TODO list
 
@@ -72,7 +112,7 @@ $ python3 run_squad.py --model_type bert \
 - [x] KorQuAD 1.0
 - [ ] KorQuAD 2.0
 - [ ] 모든 실험 결과 종합
-- [ ] ReadME 작성
+- [x] ReadME 작성
 
 ## References
 
@@ -85,3 +125,4 @@ $ python3 run_squad.py --model_type bert \
 - [KoBERT-KorQuAD by monologg](https://github.com/monologg/KoBERT-KorQuAD)
 - [SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)
 - [NVIDIA NeMo](https://github.com/NVIDIA/NeMo)
+- [KoELECTRA by monologg](https://github.com/monologg/KoELECTRA)
