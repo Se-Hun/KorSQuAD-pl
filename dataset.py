@@ -1,6 +1,6 @@
 import os
 
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 
 from transformers import squad_convert_examples_to_features
