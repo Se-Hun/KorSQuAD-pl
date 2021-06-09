@@ -65,6 +65,8 @@ $ python3 run_squad.py --model_type bert \
 
 KorQuAD 1.0에 대한 공식 Evaluation Script를 사용하려면 다음과 같은 명령어를 사용합니다.
 
+**SQuAD의 Evaluation Script와 KorQuAD의 Evaluation Script가 차이가 있기 때문에 KorQuAD에 대해 정확한 평가를 하고자 한다면 반드시 다음의 명령어를 통해 평가해야합니다.**
+
 ```bash
 $ python3 evaluate_v1_0.py ./data/korquad_v1.0/dev.json \
                            ./model/korquad_v1.0/{$model_type}/predictions_eval.json
@@ -75,7 +77,7 @@ $ python3 evaluate_v1_0.py ./data/korquad_v1.0/dev.json \
 ### 1. KorQuAD 1.0
 |                                       | Exact Match (%) | F1 Score (%) |
 | ------------------------------------- | --------------- | ------------ |
-| bert-base-multilingual-cased          | ~~              | ~~           |
+| bert-base-multilingual-cased          | 66.45           | 86.45        |
 | distilbert-base-multilingual-cased    | ~~              | ~~           |
 | monologg/kobert                       | ~~              | ~~           |
 | monologg/koelectra-base-discriminator | ~~              | ~~           |
@@ -99,8 +101,8 @@ $ python3 evaluate_v1_0.py ./data/korquad_v1.0/dev.json \
 ### 4. SQuAD 2.0
 |                                         | Exact Match (%) | F1 Score (%) |
 | --------------------------------------- | --------------- | ------------ |
-| bert-base-uncased                       | ~~              | ~~           |
-| distilbert-base-uncased                 | ~~              | ~~           |
+| bert-base-uncased                       | 71.68           | 68.80        |
+| distilbert-base-uncased                 | 66.92           | 64.36        |
 | bert-large-uncased                      | ~~              | ~~           |
 | distilbert-base-uncased-distilled-squad | ~~              | ~~           |
 
@@ -126,3 +128,4 @@ $ python3 evaluate_v1_0.py ./data/korquad_v1.0/dev.json \
 - [SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)
 - [NVIDIA NeMo](https://github.com/NVIDIA/NeMo)
 - [KoELECTRA by monologg](https://github.com/monologg/KoELECTRA)
+

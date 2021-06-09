@@ -91,8 +91,8 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
 
             # for debugging -- to small set
             # Uncomment out below code for debugging.
-            # N = 10
-            # examples = examples[:N]
+            N = 10
+            examples = examples[:N]
             # --------------------------------------
 
             is_training = mode != "test" # for obtaining start positions and end positions

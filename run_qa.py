@@ -257,8 +257,6 @@ class QuestionAnswering(pl.LightningModule):
 
 
 def main():
-    pl.seed_everything(42) # set seed
-
     # Argument Setting -------------------------------------------------------------------------------------------------
     parser = argparse.ArgumentParser()
 
@@ -266,7 +264,7 @@ def main():
     parser.add_argument("--model_type", default=None, type=str, required=True,
                         help="Model type selected in the list: " + ", ".join(MODEL_CLASSES.keys()))
     parser.add_argument("--model_name_or_path", default=None, type=str, required=True,
-                        help="Path to pre-trained model or shortcut name selected in the list: " + ", ".join(MODEL_CLASSES.keys()))
+                        help="Path to pre-trained model or shortcut name selected in the list")
 
     # Other parameters
     parser.add_argument("--data_name", default="squad_v2.0", type=str,
@@ -300,10 +298,14 @@ def main():
     parser.add_argument("--lang_id", default=0, type=int,
                         help="language id of input for language-specific xlm models (see tokenization_xlm.PRETRAINED_INIT_CONFIGURATION)")
 
+    parser.add_argument("--seed", default=42, type=int, help="Seed Number")
+
     parser = pl.Trainer.add_argparse_args(parser)
     parser = QuestionAnswering.add_model_specific_args(parser)
     args = parser.parse_args()
     # ------------------------------------------------------------------------------------------------------------------
+
+    pl.seed_everything(args.seed)  # set seed
 
     # Validation For "doc_stride" Arg ----------------------------------------------------------------------------------
     if args.doc_stride >= args.max_seq_length - args.max_query_length:
@@ -322,7 +324,7 @@ def main():
 
     # Model Checkpoint -------------------------------------------------------------------------------------------------
     from pytorch_lightning.callbacks import ModelCheckpoint
-    model_folder = './model/{}/{}'.format(args.data_name, args.model_type)
+    model_folder = './model/{}/{}/{}'.format(args.data_name, args.model_name_or_path, args.seed)
     checkpoint_callback = ModelCheckpoint(monitor='val_loss',
                                           mode='min', # loss --> minimize ! if you wanna monitor acc, you should change mode is 'max'.
                                           dirpath=model_folder,
