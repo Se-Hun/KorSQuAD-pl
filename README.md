@@ -59,14 +59,14 @@
 * `--learning_rate` : 학습률
 
 ```bash
-$ python3 run_squad.py --model_type bert \
-                       --model_name_or_path bert-base-uncased \
-                       --do_lower_case \
-                       --data_name squad_v2.0 \
-                       --do_train \
-                       --gpu_id 0 \
-                       --batch_size 12 \
-                       --learning_rate 3e-5
+$ python3 run_qa.py --model_type bert \
+                    --model_name_or_path bert-base-uncased \
+                    --do_lower_case \
+                    --data_name squad_v2.0 \
+                    --do_train \
+                    --gpu_id 0 \
+                    --batch_size 12 \
+                    --learning_rate 3e-5
 ```
 
 ### 3. Evaluation
@@ -82,29 +82,29 @@ $ python3 run_squad.py --model_type bert \
 * `--learning_rate` : 학습률
 
 ```bash
-python3 run_squad.py --model_type bert \
-                     --model_name_or_path bert-base-uncased \
-                     --do_lower_case \
-                     --data_name squad_v2.0 \
-                     --do_eval \
-                     --gpu_id 0 \
-                     --batch_size 12 \
-                     --learning_rate 3e-5
+python3 run_qa.py --model_type bert \
+                  --model_name_or_path bert-base-uncased \
+                  --do_lower_case \
+                  --data_name squad_v2.0 \
+                  --do_eval \
+                  --gpu_id 0 \
+                  --batch_size 12 \
+                  --learning_rate 3e-5
 ```
 
 ### 4. Training and Evaluation
 전이학습을 수행한 후에 곧바로 평가를 수행하고자 하면 다음과 같이 `--do_train` 옵션과 `--do_eval` 옵션을 함께 키면 됩니다.
 
 ```bash
-python3 run_squad.py --model_type bert \
-                     --model_name_or_path bert-base-uncased \
-                     --do_lower_case \
-                     --data_name squad_v2.0 \
-                     --do_train \
-                     --do_eval \
-                     --gpu_id 0 \
-                     --batch_size 12 \
-                     --learning_rate 3e-5
+python3 run_qa.py --model_type bert \
+                  --model_name_or_path bert-base-uncased \
+                  --do_lower_case \
+                  --data_name squad_v2.0 \
+                  --do_train \
+                  --do_eval \
+                  --gpu_id 0 \
+                  --batch_size 12 \
+                  --learning_rate 3e-5
 ```
 
 ### 5. Formal Evaluation for KorQuAD 1.0
@@ -114,8 +114,8 @@ KorQuAD 1.0에 대한 공식 Evaluation Script를 사용하려면 다음과 같�
 (SQuAD의 Evaluation Script와 KorQuAD의 Evaluation Script가 차이가 있기 때문에 KorQuAD에 대해 정확한 평가를 하고자 한다면 반드시 다음의 명령어를 통해 평가해야합니다.)
 
 ```bash
-python3 evaluate_v1_0.py --dataset_file ./data/korquad_v1.0/dev.json \
-                         --prediction_file ./model/korquad_v1.0/{$model_type}/predictions_eval.json
+python3 evaluate_korquad_v1.py --dataset_file ./data/korquad_v1.0/dev.json \
+                               --prediction_file ./model/korquad_v1.0/{$model_type}/predictions_eval.json
 ```
 
 ## Result of Experiments
