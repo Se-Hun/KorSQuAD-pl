@@ -6,6 +6,7 @@ from glob import glob
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping
+from pytorch_lightning.loggers import TensorBoardLogger
 
 from utils.models import MODEL_CLASSES, get_model
 from dataset import DATA_NAMES, is_squad_version_2
@@ -322,15 +323,6 @@ def main():
     dm.prepare_data()
     # ------------------------------------------------------------------------------------------------------------------
 
-    # Model Checkpoint -------------------------------------------------------------------------------------------------
-    from pytorch_lightning.callbacks import ModelCheckpoint
-    model_folder = './model/{}/{}/{}'.format(args.data_name, args.model_name_or_path, args.seed)
-    checkpoint_callback = ModelCheckpoint(monitor='val_loss',
-                                          mode='min', # loss --> minimize ! if you wanna monitor acc, you should change mode is 'max'.
-                                          dirpath=model_folder,
-                                          filename='{epoch:02d}-{val_loss:.2f}')
-    # ------------------------------------------------------------------------------------------------------------------
-
     # Early Stopping ---------------------------------------------------------------------------------------------------
     early_stop_callback = EarlyStopping(
         monitor="val_loss",
@@ -340,10 +332,13 @@ def main():
     # ------------------------------------------------------------------------------------------------------------------
 
     # Trainer ----------------------------------------------------------------------------------------------------------
+    model_folder = './model/{}/{}'.format(args.data_name, args.model_name_or_path)
+
     trainer = pl.Trainer(
         gpus=args.gpu_id if platform.system() != 'Windows' else 1,  # <-- for dev. pc
-        checkpoint_callback=checkpoint_callback,
-        callbacks=[early_stop_callback]
+        logger=TensorBoardLogger(model_folder, name='{}'.format(args.model_type)),
+        callbacks=[early_stop_callback],
+        # max_epochs=10
     )
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -356,9 +351,10 @@ def main():
 
     # Do eval !
     if args.do_eval:
-        model_files = glob(os.path.join(model_folder, '*.ckpt'))
+        model_files = glob(os.path.join(trainer.checkpoint_callback.dirpath, "*.ckpt"))
         best_fn = model_files[-1]
         print("[Evaluation] Best Model File name is {}".format(best_fn))
+
         model = QuestionAnswering.load_from_checkpoint(best_fn)
         dm.setup('test')
         trainer.test(model, datamodule=dm)
