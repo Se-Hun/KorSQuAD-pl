@@ -12,14 +12,14 @@ class KorquadDownloader:
         if not os.path.exists(self.save_path + '/korquad_v1.0'):
             os.makedirs(self.save_path + '/korquad_v1.0')
 
-        if not os.path.exists(self.save_path + '/korquad_v2.0'):
-            os.makedirs(self.save_path + '/korquad_v2.0')
+        # if not os.path.exists(self.save_path + '/korquad_v2.0'):
+        #     os.makedirs(self.save_path + '/korquad_v2.0')
 
         self.download_urls = {
             'https://korquad.github.io' '/dataset/KorQuAD_v1.0_train.json': 'korquad_v1.0/train.json',
             'https://korquad.github.io' '/dataset/KorQuAD_v1.0_dev.json': 'korquad_v1.0/dev.json',
-            'https://github.com/korquad/korquad.github.io/tree/master' '/dataset/KorQuAD_2.1/train': 'korquad_v2.0/',
-            'https://github.com/korquad/korquad.github.io/tree/master' '/dataset/KorQuAD_2.1/dev': 'korquad_v2.0/',
+            # 'https://github.com/korquad/korquad.github.io/tree/master' '/dataset/KorQuAD_2.1/train': 'korquad_v2.0/',
+            # 'https://github.com/korquad/korquad.github.io/tree/master' '/dataset/KorQuAD_2.1/dev': 'korquad_v2.0/',
         }
 
     def download(self):
