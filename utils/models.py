@@ -11,14 +11,14 @@ from transformers import (
     ElectraTokenizer
 )
 
-from utils.tokenization_kobert import KoBertTokenizer
-
+# from utils.tokenization_kobert import KoBertTokenizer
+from kobert_transformers import get_tokenizer as get_kobert_tokenizer
 
 MODEL_CLASSES = {
     "bert": (BertForQuestionAnswering, BertTokenizer),
-    "kobert": (BertForQuestionAnswering, KoBertTokenizer),
+    "kobert": (BertForQuestionAnswering, get_kobert_tokenizer),
     "distilbert": (DistilBertForQuestionAnswering, DistilBertTokenizer),
-    "distilkobert": (DistilBertForQuestionAnswering, KoBertTokenizer),
+    "distilkobert": (DistilBertForQuestionAnswering, get_kobert_tokenizer),
     "koelectra": (ElectraForQuestionAnswering, ElectraTokenizer),
     "albert": (AlbertForQuestionAnswering, AlbertTokenizer),
     "xlnet": (XLNetForQuestionAnswering, XLNetTokenizer),
@@ -35,8 +35,11 @@ def get_model(model_type, model_name_or_path):
 def get_tokenizer(model_type, model_name_or_path, do_lower_case):
     _, tokenizer_class = MODEL_CLASSES[model_type]
 
-    tokenizer = tokenizer_class.from_pretrained(model_name_or_path,
-                                                do_lower_case=do_lower_case)
+    if model_type == "kobert" or model_type == "distilkobert":
+        tokenizer = tokenizer_class()
+    else:
+        tokenizer = tokenizer_class.from_pretrained(model_name_or_path,
+                                                    do_lower_case=do_lower_case)
 
     return tokenizer
 
