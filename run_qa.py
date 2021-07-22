@@ -1,11 +1,12 @@
 import os
+import json
 import argparse
 import platform
 from glob import glob
 
 import torch
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import EarlyStopping
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from utils.models import MODEL_CLASSES, get_model
@@ -31,7 +32,7 @@ class QuestionAnswering(pl.LightningModule):
 
         self.model = model
 
-        # for SQuAD, KorQuAD
+        # for processing Impossible Question
         self.version_2_with_negative = is_squad_version_2(self.hparams.data_name)
 
     def forward(self, x):
@@ -221,23 +222,17 @@ class QuestionAnswering(pl.LightningModule):
         # Compute the F1 and exact scores.
         from transformers.data.metrics.squad_metrics import squad_evaluate
         results = squad_evaluate(examples, predictions)
-        return results
+
+        result_file = os.path.join(self.trainer.checkpoint_callback.dirpath, "result.json")
+        with open(result_file, "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=4)
+            print("Result file is dumped at ", result_file)
+
+        print(json.dumps(results, indent=4))
 
     def configure_optimizers(self):
         from transformers import AdamW
 
-        # param_optimizer = list(self.named_parameters())
-        # no_decay = ['bias', 'gamma', 'beta']
-        # optimizer_grouped_parameters = [
-        #     {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)],
-        #      'weight_decay_rate': 0.01},
-        #     {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
-        #      'weight_decay_rate': 0.0}
-        # ]
-        # optimizer = AdamW(
-        #     optimizer_grouped_parameters,
-        #     lr=self.hparams.learning_rate,
-        # )
         no_decay = ["bias", "LayerNorm.weight"]
         optimizer_grouped_parameters = [
             {
@@ -323,22 +318,32 @@ def main():
     dm.prepare_data()
     # ------------------------------------------------------------------------------------------------------------------
 
-    # Early Stopping ---------------------------------------------------------------------------------------------------
+    # Callbacks and Loggers --------------------------------------------------------------------------------------------
+    model_folder = './model/{}/{}'.format(args.data_name, args.model_name_or_path.replace("/", "-"))
+    model_checkpoint_callback = ModelCheckpoint(
+        monitor='val_loss',
+        mode='min',
+        dirpath=model_folder,
+        filename='{epoch:02d}-{val_loss:.2f}'
+    )
+
     early_stop_callback = EarlyStopping(
         monitor="val_loss",
         patience=3,
         verbose=True
     )
+
+    tensorboard_logger = TensorBoardLogger(
+        save_dir=model_folder, name=''  # <-- if experiment name(=name) is empty, subdirectory is not made.
+    )
     # ------------------------------------------------------------------------------------------------------------------
 
     # Trainer ----------------------------------------------------------------------------------------------------------
-    model_folder = './model/{}/{}'.format(args.data_name, args.model_name_or_path)
-
     trainer = pl.Trainer(
         gpus=args.gpu_id if platform.system() != 'Windows' else 1,  # <-- for dev. pc
-        logger=TensorBoardLogger(model_folder, name='{}'.format(args.model_type)),
-        callbacks=[early_stop_callback],
-        # max_epochs=10
+        logger=tensorboard_logger,
+        callbacks=[early_stop_callback, model_checkpoint_callback],
+        # max_epochs=1 # for debugging
     )
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -346,13 +351,13 @@ def main():
     if args.do_train:
         model = QuestionAnswering(args.data_name, args.model_type, args.model_name_or_path, args.do_lower_case, args.lang_id,
                                   args.n_best_size, args.max_answer_length, args.null_score_diff_threshold)
-        dm.setup('train')
+        dm.setup('fit')
         trainer.fit(model, dm)
 
     # Do eval !
     if args.do_eval:
         model_files = glob(os.path.join(trainer.checkpoint_callback.dirpath, "*.ckpt"))
-        best_fn = model_files[-1]
+        best_fn = sorted(model_files, key=lambda fn: fn.split("=")[-1])[0]
         print("[Evaluation] Best Model File name is {}".format(best_fn))
 
         model = QuestionAnswering.load_from_checkpoint(best_fn)

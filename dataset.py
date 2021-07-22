@@ -59,7 +59,7 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
 
     def setup(self, stage=None):
         # Assign train/val datasets for use in dataloaders
-        if stage == "train" or stage is None:
+        if stage == "fit" or stage is None:
             train_dataset = self.load_squad_examples(mode="train")  # Comment out this code for debugging.
             val_dataset = self.load_squad_examples(mode="dev")
 
@@ -91,7 +91,7 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
 
             # for debugging -- to small set
             # Uncomment out below code for debugging.
-            # N = 10
+            # N = 1
             # examples = examples[:N]
             # --------------------------------------
 
