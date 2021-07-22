@@ -1,3 +1,5 @@
+[한국어](./README.md) | [English](./README_EN.md)
+
 # KorSQuAD-pl
 
 **KorSQuAD-pl**은 한국어와 영어 Question Answering 테스크 데이터셋인 [KorQuAD](https://korquad.github.io/category/1.0_KOR.html)와 [SQuAD](https://rajpurkar.github.io/SQuAD-explorer/)에 대한 전이학습 실험을 할 수 있게 해주는 코드를 제공합니다.
@@ -20,6 +22,7 @@
 * torch>=1.9.0
 * pytorch-lihgtning==1.3.8
 * transformers>=4.8.0
+* kobert-transformers==0.5.1
 * scikit-learn
 * numpy
 
@@ -133,21 +136,19 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 ### 1. KorQuAD 1.0
 | Model Type   | model_name_or_path                                                                                            | Exact Match (%) | F1 Score (%) |
 | ------------ | ------------------------------------------------------------------------------------------------------------- | --------------- | ------------ |
-| BERT         | [bert-base-multilingual-cased](https://huggingface.co/bert-base-multilingual-cased)                           |                 |              |
-|              | [bert-base-multilingual-uncased](https://huggingface.co/bert-base-multilingual-uncased)                       |                 |              |
+| BERT         | [bert-base-multilingual-cased](https://huggingface.co/bert-base-multilingual-cased)                           |  65.62          |  73.36       |
 | KoBERT       | [monologg/kobert](https://huggingface.co/monologg/kobert)                                                     |                 |              |
-| DistilBERT   | [distilbert-base-multilingual-cased](https://huggingface.co/distilbert-base-multilingual-cased)               |                 |              |
+| DistilBERT   | [distilbert-base-multilingual-cased](https://huggingface.co/distilbert-base-multilingual-cased)               |  62.20          |  70.90       |
 | DistilKoBERT | [monologg/distilkobert](https://huggingface.co/monologg/distilkobert)                                         |                 |              |
-| KoELECTRA    | [monologg/koelectra-small-v2-discriminator](https://huggingface.co/monologg/koelectra-small-v2-discriminator) |                 |              |
-|              | [monologg/koelectra-base-v2-discriminator](https://huggingface.co/monologg/koelectra-base-v2-discriminator)   |                 |              |
-|              | [monologg/koelectra-small-v3-discriminator](https://huggingface.co/monologg/koelectra-small-v3-discriminator) |                 |              |
-|              | [monologg/koelectra-base-v3-discriminator](https://huggingface.co/monologg/koelectra-base-v3-discriminator)   |                 |              |
+| KoELECTRA    | [monologg/koelectra-small-v2-discriminator](https://huggingface.co/monologg/koelectra-small-v2-discriminator) |  80.51          |  86.25       |
+|              | [monologg/koelectra-base-v2-discriminator](https://huggingface.co/monologg/koelectra-base-v2-discriminator)   |  83.44          |  88.67       |
+|              | [monologg/koelectra-small-v3-discriminator](https://huggingface.co/monologg/koelectra-small-v3-discriminator) |  81.39          |  87.05       |
+|              | [monologg/koelectra-base-v3-discriminator](https://huggingface.co/monologg/koelectra-base-v3-discriminator)   |  84.48          |  89.64       |
 
 ### 2. KorQuAD 2.0 (준비중)
 | Model Type   | model_name_or_path                                                                                            | Exact Match (%) | F1 Score (%) |
 | ------------ | ------------------------------------------------------------------------------------------------------------- | --------------- | ------------ |
 | BERT         | [bert-base-multilingual-cased](https://huggingface.co/bert-base-multilingual-cased)                           |                 |              |
-|              | [bert-base-multilingual-uncased](https://huggingface.co/bert-base-multilingual-uncased)                       |                 |              |
 | KoBERT       | [monologg/kobert](https://huggingface.co/monologg/kobert)                                                     |                 |              |
 | DistilBERT   | [distilbert-base-multilingual-cased](https://huggingface.co/distilbert-base-multilingual-cased)               |                 |              |
 | DistilKoBERT | [monologg/distilkobert](https://huggingface.co/monologg/distilkobert)                                         |                 |              |
@@ -189,7 +190,7 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 ## TODO list
 
 - [ ] KorQuAD 2.0 업데이트
-- [ ] 모델 추가
+- [x] 모델 추가
 - [ ] 모든 실험 결과 종합
 - [x] ReadME 작성
 - [ ] ReadME EN 작성
