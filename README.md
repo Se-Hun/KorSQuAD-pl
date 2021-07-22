@@ -18,7 +18,7 @@
 
 ## Dependencies
 * torch>=1.9.0
-* pytorch-lihgtning>=1.3.8
+* pytorch-lihgtning==1.3.8
 * transformers>=4.8.0
 * scikit-learn
 * numpy
@@ -52,7 +52,7 @@
 * `--model_type` : 모델의 유형 ex) `bert`
 * `--model_name_or_path` : 모델의 이름 또는 경로 ex) `bert-base-uncased`
 * `--do_lower_case` : 대문자를 모두 소문자로 바꿀지(uncased model)
-* `--data_name` : 전이학습에 사용할 데이터셋 이름
+* `--data_name` : 전이학습에 사용할 데이터셋 이름 ex) `squad_v1.1`, `korquad_v1.0`, `squad_v2.0`, `korquad_v2.0`
 * `--do_train` : 훈련 모드 수행
 * `--gpu_id` : 전이학습 수행시 사용할 GPU의 ID
 * `--batch_size` : 훈련시의 배치 크기
@@ -75,7 +75,7 @@ $ python3 run_qa.py --model_type bert \
 * `--model_type` : 모델의 유형 ex) `bert`
 * `--model_name_or_path` : 모델의 이름 또는 경로 ex) `bert-base-uncased`
 * `--do_lower_case` : 대문자를 모두 소문자로 바꿀지(uncased model)
-* `--data_name` : 전이학습에 사용할 데이터셋 이름
+* `--data_name` : 전이학습에 사용할 데이터셋 이름 ex) `squad_v1.1`, `korquad_v1.0`, `squad_v2.0`, `korquad_v2.0`
 * `--do_eval` : 평가 모드 수행
 * `--gpu_id` : 전이학습 수행시 사용할 GPU의 ID
 * `--batch_size` : 훈련시의 배치 크기
@@ -118,33 +118,43 @@ python3 evaluate_korquad_v1.py --dataset_file ./data/korquad_v1.0/dev.json \
                                --prediction_file ./model/korquad_v1.0/{$model_type}/predictions_eval.json
 ```
 
+### 6. Tensorboard with.PyTorch Lightning
+
+`./model` 폴더에 모든 Checkpoint와 Tensorboard Log 파일들을 저장하도록 해두었습니다.
+
+따라서, 다음과 같이 Tensorboard의 `--logdir`를 지정하여 사용하시면 됩니다.
+
+```bash
+tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
+```
+
 ## Result of Experiments
 
 ### 1. KorQuAD 1.0
-| Model Type | model_name_or_path                                                                                            | Exact Match (%) | F1 Score (%) |
-| ---------- | ------------------------------------------------------------------------------------------------------------- | --------------- | ------------ |
-| BERT       | [bert-base-multilingual-cased](https://huggingface.co/bert-base-multilingual-cased)                           |                 |              |
-|            | [bert-base-multilingual-uncased](https://huggingface.co/bert-base-multilingual-uncased)                       |                 |              |
-|            | [monologg/kobert](https://huggingface.co/monologg/kobert)                                                     |                 |              |
-| DistilBERT | [distilbert-base-multilingual-cased](https://huggingface.co/distilbert-base-multilingual-cased)               |                 |              |
-|            | [monologg/distilkobert](https://huggingface.co/monologg/distilkobert)                                         |                 |              |
-| ELECTRA    | [monologg/koelectra-small-v2-discriminator](https://huggingface.co/monologg/koelectra-small-v2-discriminator) |                 |              |
-|            | [monologg/koelectra-base-v2-discriminator](https://huggingface.co/monologg/koelectra-base-v2-discriminator)   |                 |              |
-|            | [monologg/koelectra-small-v3-discriminator](https://huggingface.co/monologg/koelectra-small-v3-discriminator) |                 |              |
-|            | [monologg/koelectra-base-v3-discriminator](https://huggingface.co/monologg/koelectra-base-v3-discriminator)   |                 |              |
+| Model Type   | model_name_or_path                                                                                            | Exact Match (%) | F1 Score (%) |
+| ------------ | ------------------------------------------------------------------------------------------------------------- | --------------- | ------------ |
+| BERT         | [bert-base-multilingual-cased](https://huggingface.co/bert-base-multilingual-cased)                           |                 |              |
+|              | [bert-base-multilingual-uncased](https://huggingface.co/bert-base-multilingual-uncased)                       |                 |              |
+| KoBERT       | [monologg/kobert](https://huggingface.co/monologg/kobert)                                                     |                 |              |
+| DistilBERT   | [distilbert-base-multilingual-cased](https://huggingface.co/distilbert-base-multilingual-cased)               |                 |              |
+| DistilKoBERT | [monologg/distilkobert](https://huggingface.co/monologg/distilkobert)                                         |                 |              |
+| KoELECTRA    | [monologg/koelectra-small-v2-discriminator](https://huggingface.co/monologg/koelectra-small-v2-discriminator) |                 |              |
+|              | [monologg/koelectra-base-v2-discriminator](https://huggingface.co/monologg/koelectra-base-v2-discriminator)   |                 |              |
+|              | [monologg/koelectra-small-v3-discriminator](https://huggingface.co/monologg/koelectra-small-v3-discriminator) |                 |              |
+|              | [monologg/koelectra-base-v3-discriminator](https://huggingface.co/monologg/koelectra-base-v3-discriminator)   |                 |              |
 
 ### 2. KorQuAD 2.0 (준비중)
-| Model Type | model_name_or_path                                                                                            | Exact Match (%) | F1 Score (%) |
-| ---------- | ------------------------------------------------------------------------------------------------------------- | --------------- | ------------ |
-| BERT       | [bert-base-multilingual-cased](https://huggingface.co/bert-base-multilingual-cased)                           |                 |              |
-|            | [bert-base-multilingual-uncased](https://huggingface.co/bert-base-multilingual-uncased)                       |                 |              |
-|            | [monologg/kobert](https://huggingface.co/monologg/kobert)                                                     |                 |              |
-| DistilBERT | [distilbert-base-multilingual-cased](https://huggingface.co/distilbert-base-multilingual-cased)               |                 |              |
-|            | [monologg/distilkobert](https://huggingface.co/monologg/distilkobert)                                         |                 |              |
-| ELECTRA    | [monologg/koelectra-small-v2-discriminator](https://huggingface.co/monologg/koelectra-small-v2-discriminator) |                 |              |
-|            | [monologg/koelectra-base-v2-discriminator](https://huggingface.co/monologg/koelectra-base-v2-discriminator)   |                 |              |
-|            | [monologg/koelectra-small-v3-discriminator](https://huggingface.co/monologg/koelectra-small-v3-discriminator) |                 |              |
-|            | [monologg/koelectra-base-v3-discriminator](https://huggingface.co/monologg/koelectra-base-v3-discriminator)   |                 |              |
+| Model Type   | model_name_or_path                                                                                            | Exact Match (%) | F1 Score (%) |
+| ------------ | ------------------------------------------------------------------------------------------------------------- | --------------- | ------------ |
+| BERT         | [bert-base-multilingual-cased](https://huggingface.co/bert-base-multilingual-cased)                           |                 |              |
+|              | [bert-base-multilingual-uncased](https://huggingface.co/bert-base-multilingual-uncased)                       |                 |              |
+| KoBERT       | [monologg/kobert](https://huggingface.co/monologg/kobert)                                                     |                 |              |
+| DistilBERT   | [distilbert-base-multilingual-cased](https://huggingface.co/distilbert-base-multilingual-cased)               |                 |              |
+| DistilKoBERT | [monologg/distilkobert](https://huggingface.co/monologg/distilkobert)                                         |                 |              |
+| KoELECTRA    | [monologg/koelectra-small-v2-discriminator](https://huggingface.co/monologg/koelectra-small-v2-discriminator) |                 |              |
+|              | [monologg/koelectra-base-v2-discriminator](https://huggingface.co/monologg/koelectra-base-v2-discriminator)   |                 |              |
+|              | [monologg/koelectra-small-v3-discriminator](https://huggingface.co/monologg/koelectra-small-v3-discriminator) |                 |              |
+|              | [monologg/koelectra-base-v3-discriminator](https://huggingface.co/monologg/koelectra-base-v3-discriminator)   |                 |              |
 
 ### 3. SQuAD 1.1
 | Model Type | model_name_or_path                                                                              | Exact Match (%) | F1 Score (%) |
