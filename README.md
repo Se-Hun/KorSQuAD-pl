@@ -23,6 +23,7 @@
 * pytorch-lihgtning==1.3.8
 * transformers>=4.8.0
 * kobert-transformers==0.5.1
+* sentencepiece>=0.1.96
 * scikit-learn
 * numpy
 
@@ -137,13 +138,13 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 | Model Type   | model_name_or_path                                                                                            | Exact Match (%) | F1 Score (%) |
 | ------------ | ------------------------------------------------------------------------------------------------------------- | --------------- | ------------ |
 | BERT         | [bert-base-multilingual-cased](https://huggingface.co/bert-base-multilingual-cased)                           |  65.62          |  73.36       |
-| KoBERT       | [monologg/kobert](https://huggingface.co/monologg/kobert)                                                     |                 |              |
+| KoBERT       | [monologg/kobert](https://huggingface.co/monologg/kobert)                                                     |  50.91          |  60.99       |
 | DistilBERT   | [distilbert-base-multilingual-cased](https://huggingface.co/distilbert-base-multilingual-cased)               |  62.20          |  70.90       |
-| DistilKoBERT | [monologg/distilkobert](https://huggingface.co/monologg/distilkobert)                                         |                 |              |
+| DistilKoBERT | [monologg/distilkobert](https://huggingface.co/monologg/distilkobert)                                         |  55.88          |  64.06       |
 | KoELECTRA    | [monologg/koelectra-small-v2-discriminator](https://huggingface.co/monologg/koelectra-small-v2-discriminator) |  80.51          |  86.25       |
 |              | [monologg/koelectra-base-v2-discriminator](https://huggingface.co/monologg/koelectra-base-v2-discriminator)   |  83.44          |  88.67       |
 |              | [monologg/koelectra-small-v3-discriminator](https://huggingface.co/monologg/koelectra-small-v3-discriminator) |  81.39          |  87.05       |
-|              | [monologg/koelectra-base-v3-discriminator](https://huggingface.co/monologg/koelectra-base-v3-discriminator)   |  84.48          |  89.64       |
+|              | [monologg/koelectra-base-v3-discriminator](https://huggingface.co/monologg/koelectra-base-v3-discriminator)   |  **84.48**      |  **89.64**   |
 
 ### 2. KorQuAD 2.0 (준비중)
 | Model Type   | model_name_or_path                                                                                            | Exact Match (%) | F1 Score (%) |
@@ -160,27 +161,27 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 ### 3. SQuAD 1.1
 | Model Type | model_name_or_path                                                                              | Exact Match (%) | F1 Score (%) |
 | ---------- | ----------------------------------------------------------------------------------------------- | --------------- | ------------ |
-| BERT       | [bert-base-cased](https://huggingface.co/bert-base-cased)                                       |                 |              |
-|            | [bert-base-uncased](https://huggingface.co/bert-base-uncased)                                   |                 |              |
-| DistilBERT | [distilbert-base-cased](https://huggingface.co/distilbert-base-cased)                           |                 |              |
-|            | [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased)                       |                 |              |
-| ALBERT     | [albert-base-v1](https://huggingface.co/albert-base-v1)                                         |                 |              |
-|            | [albert-base-v2](https://huggingface.co/albert-base-v2)                                         |                 |              |
+| BERT       | [bert-base-cased](https://huggingface.co/bert-base-cased)                                       |  77.94          |  85.77       |
+|            | [bert-base-uncased](https://huggingface.co/bert-base-uncased)                                   |  78.13          |  86.00       |
+| DistilBERT | [distilbert-base-cased](https://huggingface.co/distilbert-base-cased)                           |  74.23          |  82.49       |
+|            | [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased)                       |  74.67          |  82.95       |
+| ALBERT     | [albert-base-v1](https://huggingface.co/albert-base-v1)                                         |  75.58          |  84.47       |
+|            | [albert-base-v2](https://huggingface.co/albert-base-v2)                                         |  74.46          |  83.60       |
 | XLNet      | [xlnet-base-cased](https://huggingface.co/xlnet-base-cased)                                     |                 |              |
 |            | [xlnet-large-cased](https://huggingface.co/xlnet-large-cased)                                   |                 |              |
-| ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator) |                 |              |
-|            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)   |                 |              |
+| ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator) |  68.52          |  77.29       |
+|            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)   |  74.82          |  82.76       |
 |            | [google/electra-large-discriminator](https://huggingface.co/google/electra-large-discriminator) |                 |              |
 
 ### 4. SQuAD 2.0
 | Model Type | model_name_or_path                                                                              | Exact Match (%) | F1 Score (%) |
 | ---------- | ----------------------------------------------------------------------------------------------- | --------------- | ------------ |
-| BERT       | [bert-base-cased](https://huggingface.co/bert-base-cased)                                       |                 |              |
-|            | [bert-base-uncased](https://huggingface.co/bert-base-uncased)                                   |                 |              |
-| DistilBERT | [distilbert-base-cased](https://huggingface.co/distilbert-base-cased)                           |                 |              |
-|            | [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased)                       |                 |              |
-| ALBERT     | [albert-base-v1](https://huggingface.co/albert-base-v1)                                         |                 |              |
-|            | [albert-base-v2](https://huggingface.co/albert-base-v2)                                         |                 |              |
+| BERT       | [bert-base-cased](https://huggingface.co/bert-base-cased)                                       |  68.03          |  71.23       |
+|            | [bert-base-uncased](https://huggingface.co/bert-base-uncased)                                   |  69.68          |  72.89       |
+| DistilBERT | [distilbert-base-cased](https://huggingface.co/distilbert-base-cased)                           |  63.89          |  66.97       |
+|            | [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased)                       |  65.40          |  68.03       |
+| ALBERT     | [albert-base-v1](https://huggingface.co/albert-base-v1)                                         |  72.12          |  75.54       |
+|            | [albert-base-v2](https://huggingface.co/albert-base-v2)                                         |  68.75          |  72.37       |
 | XLNet      | [xlnet-base-cased](https://huggingface.co/xlnet-base-cased)                                     |                 |              |
 |            | [xlnet-large-cased](https://huggingface.co/xlnet-large-cased)                                   |                 |              |
 | ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator) |                 |              |
