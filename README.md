@@ -159,34 +159,36 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 |              | [monologg/koelectra-base-v3-discriminator](https://huggingface.co/monologg/koelectra-base-v3-discriminator)   |                 |              |
 
 ### 3. SQuAD 1.1
-| Model Type | model_name_or_path                                                                              | Exact Match (%) | F1 Score (%) |
-| ---------- | ----------------------------------------------------------------------------------------------- | --------------- | ------------ |
-| BERT       | [bert-base-cased](https://huggingface.co/bert-base-cased)                                       |  77.94          |  85.77       |
-|            | [bert-base-uncased](https://huggingface.co/bert-base-uncased)                                   |  78.13          |  86.00       |
-| DistilBERT | [distilbert-base-cased](https://huggingface.co/distilbert-base-cased)                           |  74.23          |  82.49       |
-|            | [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased)                       |  74.67          |  82.95       |
-| ALBERT     | [albert-base-v1](https://huggingface.co/albert-base-v1)                                         |  75.58          |  84.47       |
-|            | [albert-base-v2](https://huggingface.co/albert-base-v2)                                         |  74.46          |  83.60       |
-| XLNet      | [xlnet-base-cased](https://huggingface.co/xlnet-base-cased)                                     |                 |              |
-|            | [xlnet-large-cased](https://huggingface.co/xlnet-large-cased)                                   |                 |              |
-| ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator) |  68.52          |  77.29       |
-|            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)   |  74.82          |  82.76       |
-|            | [google/electra-large-discriminator](https://huggingface.co/google/electra-large-discriminator) |                 |              |
+| Model Type | model_name_or_path                                                                                    | Exact Match (%) | F1 Score (%) |
+| ---------- | ----------------------------------------------------------------------------------------------------- | --------------- | ------------ |
+| BERT       | [bert-base-cased](https://huggingface.co/bert-base-cased)                                             |  77.94          |  85.77       |
+|            | [bert-base-uncased](https://huggingface.co/bert-base-uncased)                                         |  78.13          |  86.00       |
+|            | [bert-large-uncased-whole-word-masking](https://huggingface.co/bert-large-uncased-whole-word-masking) |                 |              |
+| DistilBERT | [distilbert-base-cased](https://huggingface.co/distilbert-base-cased)                                 |  74.23          |  82.49       |
+|            | [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased)                             |  74.67          |  82.95       |
+| ALBERT     | [albert-base-v1](https://huggingface.co/albert-base-v1)                                               |  75.58          |  84.47       |
+|            | [albert-base-v2](https://huggingface.co/albert-base-v2)                                               |  74.46          |  83.60       |
+| XLNet      | [xlnet-base-cased](https://huggingface.co/xlnet-base-cased)                                           |                 |              |
+|            | [xlnet-large-cased](https://huggingface.co/xlnet-large-cased)                                         |                 |              |
+| ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator)       |  68.52          |  77.29       |
+|            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)         |  74.82          |  82.76       |
+|            | [google/electra-large-discriminator](https://huggingface.co/google/electra-large-discriminator)       |                 |              |
 
 ### 4. SQuAD 2.0
-| Model Type | model_name_or_path                                                                              | Exact Match (%) | F1 Score (%) |
-| ---------- | ----------------------------------------------------------------------------------------------- | --------------- | ------------ |
-| BERT       | [bert-base-cased](https://huggingface.co/bert-base-cased)                                       |  68.03          |  71.23       |
-|            | [bert-base-uncased](https://huggingface.co/bert-base-uncased)                                   |  69.68          |  72.89       |
-| DistilBERT | [distilbert-base-cased](https://huggingface.co/distilbert-base-cased)                           |  63.89          |  66.97       |
-|            | [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased)                       |  65.40          |  68.03       |
-| ALBERT     | [albert-base-v1](https://huggingface.co/albert-base-v1)                                         |  72.12          |  75.54       |
-|            | [albert-base-v2](https://huggingface.co/albert-base-v2)                                         |  68.75          |  72.37       |
-| XLNet      | [xlnet-base-cased](https://huggingface.co/xlnet-base-cased)                                     |                 |              |
-|            | [xlnet-large-cased](https://huggingface.co/xlnet-large-cased)                                   |                 |              |
-| ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator) |                 |              |
-|            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)   |                 |              |
-|            | [google/electra-large-discriminator](https://huggingface.co/google/electra-large-discriminator) |                 |              |
+| Model Type | model_name_or_path                                                                                    | Exact Match (%) | F1 Score (%) |
+| ---------- | ----------------------------------------------------------------------------------------------------- | --------------- | ------------ |
+| BERT       | [bert-base-cased](https://huggingface.co/bert-base-cased)                                             |  68.03          |  71.23       |
+|            | [bert-base-uncased](https://huggingface.co/bert-base-uncased)                                         |  69.68          |  72.89       |
+|            | [bert-large-uncased-whole-word-masking](https://huggingface.co/bert-large-uncased-whole-word-masking) |                 |              |
+| DistilBERT | [distilbert-base-cased](https://huggingface.co/distilbert-base-cased)                                 |  63.89          |  66.97       |
+|            | [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased)                             |  65.40          |  68.03       |
+| ALBERT     | [albert-base-v1](https://huggingface.co/albert-base-v1)                                               |  72.12          |  75.54       |
+|            | [albert-base-v2](https://huggingface.co/albert-base-v2)                                               |  68.75          |  72.37       |
+| XLNet      | [xlnet-base-cased](https://huggingface.co/xlnet-base-cased)                                           |                 |              |
+|            | [xlnet-large-cased](https://huggingface.co/xlnet-large-cased)                                         |                 |              |
+| ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator)       |  62.14          |  64.57       |
+|            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)         |  63.68          |  67.30       |
+|            | [google/electra-large-discriminator](https://huggingface.co/google/electra-large-discriminator)       |                 |              |
 
 ## TODO list
 
