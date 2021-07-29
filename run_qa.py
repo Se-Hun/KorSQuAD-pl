@@ -239,8 +239,10 @@ class QuestionAnswering(pl.LightningModule):
                 "params": [p for n, p in self.named_parameters() if not any(nd in n for nd in no_decay)],
                 "weight_decay": 0.0,
             },
-            {"params": [p for n, p in self.named_parameters() if any(nd in n for nd in no_decay)],
-             "weight_decay": 0.0},
+            {
+                "params": [p for n, p in self.named_parameters() if any(nd in n for nd in no_decay)],
+                "weight_decay": 0.0
+            },
         ]
         optimizer = AdamW(optimizer_grouped_parameters, lr=self.hparams.learning_rate, eps=1e-8)
         return optimizer
@@ -282,8 +284,10 @@ def main():
     parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
     parser.add_argument("--do_eval", action="store_true", help="Whether to run eval on the dev set.")
 
-    parser.add_argument("--batch_size", help="batch_size", default=32, type=int)
-    parser.add_argument("--gpu_id", help="gpu device id", default="0")
+    # parser.add_argument("--max_epochs", default=2, type=int, help="max epochs")
+    parser.add_argument("--batch_size", default=32, type=int, help="batch size")
+    parser.add_argument("--gpu_ids", type=str, default="0",
+                        help="gpu device ids. e.g.) `0` : GPU 0, `0,3` : GPU 0 and 3")
 
     parser.add_argument("--n_best_size", default=20, type=int,
                         help="The total number of n-best predictions to generate in the nbest_predictions.json output file.")
@@ -340,10 +344,11 @@ def main():
 
     # Trainer ----------------------------------------------------------------------------------------------------------
     trainer = pl.Trainer(
-        gpus=args.gpu_id if platform.system() != 'Windows' else 1,  # <-- for dev. pc
+        gpus=args.gpu_ids if platform.system() != 'Windows' else 1,  # <-- for dev. pc
+        accelerator="ddp" if "," in args.gpu_ids else None,
         logger=tensorboard_logger,
         callbacks=[early_stop_callback, model_checkpoint_callback],
-        # max_epochs=1 # for debugging
+        max_epochs=2 # for debugging
     )
     # ------------------------------------------------------------------------------------------------------------------
 

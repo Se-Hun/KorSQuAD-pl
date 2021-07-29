@@ -1,5 +1,6 @@
 import os
 
+import torch
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 
@@ -32,6 +33,7 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
 
         super().__init__()
 
+        # configurations
         self.data_name = data_name
         if self.data_name not in DATA_NAMES:
             raise NotImplementedError(data_name) # validation about dataset name
@@ -44,10 +46,13 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
         self.doc_stride = doc_stride
         self.max_query_length = max_query_length
 
-        self.version_2_with_negative = is_squad_version_2(self.data_name) # for SQuAD, KorQuAD
+        self.version_2_with_negative = is_squad_version_2(self.data_name) # @ SQuAD Dataset
 
-        # store batch size
+        self.num_threads_for_features = 4
         self.batch_size = batch_size
+
+        # for balancing between CPU and GPU
+        self.num_workers = 4 * torch.cuda.device_count()
 
     def prepare_data(self):
         # prepare tokenizer
@@ -91,7 +96,7 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
 
             # for debugging -- to small set
             # Uncomment out below code for debugging.
-            # N = 1
+            # N = 10
             # examples = examples[:N]
             # --------------------------------------
 
@@ -104,7 +109,7 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
                 max_query_length=self.max_query_length,
                 is_training=is_training,
                 return_dataset="pt", # Return DataType is Pytorch Tensor !
-                threads=2
+                threads=self.num_threads_for_features
             )
 
         if not is_training:
@@ -113,10 +118,10 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
         return dataset
 
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
+        return DataLoader(self.train_dataset, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=True)
 
     def val_dataloader(self):
-        return DataLoader(self.val_dataset, batch_size=self.batch_size)
+        return DataLoader(self.val_dataset, batch_size=self.batch_size, num_workers=self.num_workers)
 
     def test_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=self.batch_size)
+        return DataLoader(self.test_dataset, batch_size=self.batch_size, num_workers=self.num_workers)
