@@ -348,7 +348,7 @@ def main():
         accelerator="ddp" if "," in args.gpu_ids else None,
         logger=tensorboard_logger,
         callbacks=[early_stop_callback, model_checkpoint_callback],
-        max_epochs=2 # for debugging
+        # max_epochs=2 # for debugging
     )
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -361,6 +361,8 @@ def main():
 
     # Do eval !
     if args.do_eval:
+        assert (trainer.num_gpus < 2), "At test mode, use single gpu for preventing collision !"
+
         model_files = glob(os.path.join(trainer.checkpoint_callback.dirpath, "*.ckpt"))
         best_fn = sorted(model_files, key=lambda fn: fn.split("=")[-1])[0]
         print("[Evaluation] Best Model File name is {}".format(best_fn))
