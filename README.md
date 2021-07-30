@@ -58,19 +58,19 @@
 * `--do_lower_case` : 대문자를 모두 소문자로 바꿀지(uncased model)
 * `--data_name` : 전이학습에 사용할 데이터셋 이름 ex) `squad_v1.1`, `korquad_v1.0`, `squad_v2.0`, `korquad_v2.0`
 * `--do_train` : 훈련 모드 수행
-* `--gpu_id` : 전이학습 수행시 사용할 GPU의 ID
+* `--gpu_ids` : 전이학습 수행시 사용할 GPU의 ID들 ex) `0` : 0번 GPU 사용, `0,3` : 0번과 3번 GPU 사용
 * `--batch_size` : 훈련시의 배치 크기
 * `--learning_rate` : 학습률
 
 ```bash
-$ python3 run_qa.py --model_type bert \
-                    --model_name_or_path bert-base-uncased \
-                    --do_lower_case \
-                    --data_name squad_v2.0 \
-                    --do_train \
-                    --gpu_id 0 \
-                    --batch_size 12 \
-                    --learning_rate 3e-5
+python3 run_qa.py --model_type bert \
+                  --model_name_or_path bert-base-uncased \
+                  --do_lower_case \
+                  --data_name squad_v2.0 \
+                  --do_train \
+                  --gpu_ids 0 \
+                  --batch_size 12 \
+                  --learning_rate 3e-5
 ```
 
 ### 3. Evaluation
@@ -81,7 +81,7 @@ $ python3 run_qa.py --model_type bert \
 * `--do_lower_case` : 대문자를 모두 소문자로 바꿀지(uncased model)
 * `--data_name` : 전이학습에 사용할 데이터셋 이름 ex) `squad_v1.1`, `korquad_v1.0`, `squad_v2.0`, `korquad_v2.0`
 * `--do_eval` : 평가 모드 수행
-* `--gpu_id` : 전이학습 수행시 사용할 GPU의 ID
+* `--gpu_ids` : 전이학습 수행시 사용할 GPU의 ID들 ex) `0` : 0번 GPU 사용, `0,3` : 0번과 3번 GPU 사용
 * `--batch_size` : 훈련시의 배치 크기
 * `--learning_rate` : 학습률
 
@@ -91,7 +91,7 @@ python3 run_qa.py --model_type bert \
                   --do_lower_case \
                   --data_name squad_v2.0 \
                   --do_eval \
-                  --gpu_id 0 \
+                  --gpu_ids 0 \
                   --batch_size 12 \
                   --learning_rate 3e-5
 ```
@@ -106,12 +106,41 @@ python3 run_qa.py --model_type bert \
                   --data_name squad_v2.0 \
                   --do_train \
                   --do_eval \
-                  --gpu_id 0 \
+                  --gpu_ids 0 \
                   --batch_size 12 \
                   --learning_rate 3e-5
 ```
 
-### 5. Formal Evaluation for KorQuAD 1.0
+### 5. Distributed Training and Evaluation
+
+Distributed Training을 수행하고 싶다면 다음과 같은 명령어를 사용합니다. 
+
+```bash
+python3 run_qa.py --model_type bert \
+                  --model_name_or_path bert-large-uncased-whole-word-masking \
+                  --do_lower_case \
+                  --data_name squad_v2.0 \
+                  --do_train \
+                  --gpu_ids 0,1,2,3 \
+                  --batch_size 4 \
+                  --learning_rate 3e-5
+```
+
+Distributed Training을 수행할 때에는 Multi GPU를 이용하여 평가를 하면 충돌이 발생합니다. 따라서, 다음과 같이 Single GPU로 명령어를 변경하여 학습과 별개로 사용해야 합니다.
+
+```bash
+python3 run_qa.py --model_type bert \
+                  --model_name_or_path bert-large-uncased-whole-word-masking \
+                  --do_lower_case \
+                  --data_name squad_v2.0 \
+                  --do_eval \
+                  --gpu_ids 0 \
+                  --batch_size 4 \
+                  --learning_rate 3e-5
+```
+
+
+### 6. Formal Evaluation for KorQuAD 1.0
 
 KorQuAD 1.0에 대한 공식 Evaluation Script를 사용하려면 다음과 같은 명령어를 사용합니다.
 
@@ -122,7 +151,7 @@ python3 evaluate_korquad_v1.py --dataset_file ./data/korquad_v1.0/dev.json \
                                --prediction_file ./model/korquad_v1.0/{$model_type}/predictions_eval.json
 ```
 
-### 6. Tensorboard with.PyTorch Lightning
+### 7. Tensorboard with.PyTorch Lightning
 
 `./model` 폴더에 모든 Checkpoint와 Tensorboard Log 파일들을 저장하도록 해두었습니다.
 
@@ -133,6 +162,11 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 ```
 
 ## Result of Experiments
+
+실험의 세부사항은 다음과 같습니다.
+
+* `small`, `base` 모델의 경우, 단일 GPU를 통해 실험 수행
+* `large` 모델의 경우, Distributed Training을 통해 실험 수행
 
 ### 1. KorQuAD 1.0
 | Model Type   | model_name_or_path                                                                                            | Exact Match (%) | F1 Score (%) |
@@ -163,7 +197,7 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 | ---------- | ----------------------------------------------------------------------------------------------------- | --------------- | ------------ |
 | BERT       | [bert-base-cased](https://huggingface.co/bert-base-cased)                                             |  77.94          |  85.77       |
 |            | [bert-base-uncased](https://huggingface.co/bert-base-uncased)                                         |  78.13          |  86.00       |
-|            | [bert-large-uncased-whole-word-masking](https://huggingface.co/bert-large-uncased-whole-word-masking) |                 |              |
+|            | [bert-large-uncased-whole-word-masking](https://huggingface.co/bert-large-uncased-whole-word-masking) |  **83.10**      |  **90.00**   |
 | DistilBERT | [distilbert-base-cased](https://huggingface.co/distilbert-base-cased)                                 |  74.23          |  82.49       |
 |            | [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased)                             |  74.67          |  82.95       |
 | ALBERT     | [albert-base-v1](https://huggingface.co/albert-base-v1)                                               |  75.58          |  84.47       |
@@ -179,7 +213,7 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 | ---------- | ----------------------------------------------------------------------------------------------------- | --------------- | ------------ |
 | BERT       | [bert-base-cased](https://huggingface.co/bert-base-cased)                                             |  68.03          |  71.23       |
 |            | [bert-base-uncased](https://huggingface.co/bert-base-uncased)                                         |  69.68          |  72.89       |
-|            | [bert-large-uncased-whole-word-masking](https://huggingface.co/bert-large-uncased-whole-word-masking) |                 |              |
+|            | [bert-large-uncased-whole-word-masking](https://huggingface.co/bert-large-uncased-whole-word-masking) |  71.95          |  75.72       |
 | DistilBERT | [distilbert-base-cased](https://huggingface.co/distilbert-base-cased)                                 |  63.89          |  66.97       |
 |            | [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased)                             |  65.40          |  68.03       |
 | ALBERT     | [albert-base-v1](https://huggingface.co/albert-base-v1)                                               |  72.12          |  75.54       |
