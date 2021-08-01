@@ -11,9 +11,9 @@ DATA_NAMES = ["squad_v1.1", "korquad_v1.0", "squad_v2.0", "korquad_v2.0"]
 
 # Data Utils -----------------------------------------------------------------------------------------------------------
 def is_squad_version_2(data_name):
-    if data_name in ["squad_v2.0", "korquad_v2.0"]:
+    if data_name in ["squad_v2.0"]:
         return True
-    elif data_name in ["squad_v1.1", "korquad_v1.0"]:
+    elif data_name in ["squad_v1.1", "korquad_v1.0", "korquad_v2.0"]:
         return False
     else:
         raise KeyError(data_name)
