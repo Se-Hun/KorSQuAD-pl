@@ -19,7 +19,6 @@ class QuestionAnswering(pl.LightningModule):
                  data_name,
                  model_type,
                  model_name_or_path,
-                 do_lower_case,
                  lang_id,
                  n_best_size,
                  max_answer_length,
@@ -31,8 +30,8 @@ class QuestionAnswering(pl.LightningModule):
 
         # prepare model
         model = get_model(self.hparams.model_type, self.hparams.model_name_or_path)
-
         self.model = model
+        self.do_lower_case = True if "uncased" in self.hparams.model_name_or_path else False
 
         # for processing Impossible Question
         self.version_2_with_negative = is_squad_version_2(self.hparams.data_name)
@@ -211,7 +210,7 @@ class QuestionAnswering(pl.LightningModule):
                 all_results,
                 self.hparams.n_best_size,
                 self.hparams.max_answer_length,
-                self.hparams.do_lower_case,
+                self.do_lower_case,
                 output_prediction_file,
                 output_nbest_file,
                 output_null_log_odds_file,
@@ -250,7 +249,6 @@ class QuestionAnswering(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--learning_rate', type=float, default=3e-5)
         return parser
 
 
@@ -278,9 +276,6 @@ def main():
                         help="The maximum number of tokens for the question. Questions longer than this will "
                              "be truncated to this length.")
 
-    parser.add_argument("--do_lower_case", action="store_true",
-                        help="Set this flag if you are using an uncased model.")  # In case of Uncased Model, Set this flag!!!
-
     parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
     parser.add_argument("--do_eval", action="store_true", help="Whether to run eval on the dev set.")
 
@@ -288,6 +283,7 @@ def main():
     parser.add_argument("--batch_size", default=32, type=int, help="batch size")
     parser.add_argument("--gpu_ids", type=str, default="0",
                         help="gpu device ids. e.g.) `0` : GPU 0, `0,3` : GPU 0 and 3")
+    parser.add_argument('--learning_rate', type=float, default=3e-5, help="learning_rate")
 
     parser.add_argument("--n_best_size", default=20, type=int,
                         help="The total number of n-best predictions to generate in the nbest_predictions.json output file.")
@@ -316,9 +312,8 @@ def main():
     # Dataset ----------------------------------------------------------------------------------------------------------
     from dataset import QuestionAnswering_Data_Module
     args.model_type = args.model_type.lower()
-    dm = QuestionAnswering_Data_Module(args.data_name, args.model_type, args.model_name_or_path, args.do_lower_case,
-                                       args.max_seq_length, args.doc_stride, args.max_query_length,
-                                       args.batch_size)
+    dm = QuestionAnswering_Data_Module(args.data_name, args.model_type, args.model_name_or_path,
+                                       args.max_seq_length, args.doc_stride, args.max_query_length, args.batch_size)
     dm.prepare_data()
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -348,8 +343,8 @@ def main():
 
     # Do train !
     if args.do_train:
-        model = QuestionAnswering(args.data_name, args.model_type, args.model_name_or_path, args.do_lower_case, args.lang_id,
-                                  args.n_best_size, args.max_answer_length, args.null_score_diff_threshold)
+        model = QuestionAnswering(args.data_name, args.model_type, args.model_name_or_path, args.lang_id,
+                                  args.n_best_size, args.max_answer_length, args.null_score_diff_threshold, args.learning_rate)
         dm.setup('fit')
         trainer.fit(model, dm)
 

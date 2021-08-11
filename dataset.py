@@ -25,7 +25,6 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
                  data_name,
                  model_type,
                  model_name_or_path,
-                 do_lower_case,
                  max_seq_length,
                  doc_stride,
                  max_query_length,
@@ -40,7 +39,7 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
 
         self.model_type = model_type
         self.model_name_or_path = model_name_or_path
-        self.do_lower_case = do_lower_case
+        self.do_lower_case = True if "uncased" in model_name_or_path else False
 
         self.max_seq_length = max_seq_length
         self.doc_stride = doc_stride
