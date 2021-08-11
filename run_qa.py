@@ -4,6 +4,8 @@ import argparse
 import platform
 from glob import glob
 
+from transformers import AdamW, get_linear_schedule_with_warmup
+
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
@@ -231,26 +233,24 @@ class QuestionAnswering(pl.LightningModule):
         print(json.dumps(results, indent=4))
 
     def configure_optimizers(self):
-        from transformers import AdamW
-
-        no_decay = ["bias", "LayerNorm.weight"]
+        no_decay = ['bias', 'LayerNorm.weight']
         optimizer_grouped_parameters = [
-            {
-                "params": [p for n, p in self.named_parameters() if not any(nd in n for nd in no_decay)],
-                "weight_decay": 0.0,
-            },
-            {
-                "params": [p for n, p in self.named_parameters() if any(nd in n for nd in no_decay)],
-                "weight_decay": 0.0
-            },
+            {'params': [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
+             'weight_decay': 0.0},
+            {'params': [p for n, p in self.model.named_parameters() if any(nd in n for nd in no_decay)],
+             'weight_decay': 0.0}
         ]
         optimizer = AdamW(optimizer_grouped_parameters, lr=self.hparams.learning_rate, eps=1e-8)
-        return optimizer
+
+        t_total = len(self.train_dataloader()) // self.trainer.max_epochs
+        scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=t_total)
+
+        return [optimizer], [scheduler]
 
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
-        parser.add_argument('--learning_rate', type=float, default=5e-5)
+        parser.add_argument('--learning_rate', type=float, default=3e-5)
         return parser
 
 
@@ -284,7 +284,7 @@ def main():
     parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
     parser.add_argument("--do_eval", action="store_true", help="Whether to run eval on the dev set.")
 
-    # parser.add_argument("--max_epochs", default=2, type=int, help="max epochs")
+    parser.add_argument("--num_train_epochs", default=3, type=int, help="Epochs at train time.")
     parser.add_argument("--batch_size", default=32, type=int, help="batch size")
     parser.add_argument("--gpu_ids", type=str, default="0",
                         help="gpu device ids. e.g.) `0` : GPU 0, `0,3` : GPU 0 and 3")
@@ -328,13 +328,7 @@ def main():
         monitor='val_loss',
         mode='min',
         dirpath=model_folder,
-        filename='{epoch:02d}-{val_loss:.2f}'
-    )
-
-    early_stop_callback = EarlyStopping(
-        monitor="val_loss",
-        patience=3,
-        verbose=True
+        filename='{epoch:02d}-{val_loss:.3f}'
     )
 
     tensorboard_logger = TensorBoardLogger(
@@ -347,8 +341,8 @@ def main():
         gpus=args.gpu_ids if platform.system() != 'Windows' else 1,  # <-- for dev. pc
         accelerator="ddp" if "," in args.gpu_ids else None,
         logger=tensorboard_logger,
-        callbacks=[early_stop_callback, model_checkpoint_callback],
-        # max_epochs=2 # for debugging
+        callbacks=[model_checkpoint_callback],
+        max_epochs=args.num_train_epochs
     )
     # ------------------------------------------------------------------------------------------------------------------
 
