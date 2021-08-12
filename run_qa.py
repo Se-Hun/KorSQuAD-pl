@@ -5,33 +5,34 @@ import platform
 from glob import glob
 
 from transformers import AdamW, get_linear_schedule_with_warmup
+from transformers.data.processors.squad import SquadResult
+from transformers.data.metrics.squad_metrics import compute_predictions_logits, compute_predictions_log_probs, squad_evaluate
 
 import torch
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from utils.models import MODEL_CLASSES, get_model
-from dataset import DATA_NAMES, is_squad_version_2
+from dataset import QuestionAnsweringDataModule, DATA_NAMES, is_squad_version_2
+
 
 class QuestionAnswering(pl.LightningModule):
-    def __init__(self,
-                 data_name,
-                 model_type,
-                 model_name_or_path,
-                 lang_id,
-                 n_best_size,
-                 max_answer_length,
-                 null_score_diff_threshold,
-                 learning_rate: float=5e-5):
-
+    def __init__(self, **kwargs):
         super().__init__()
-        self.save_hyperparameters()
+
+        # save hyper parameters
+        self.save_hyperparameters("model_type", "model_name_or_path", "data_name", "lang_id",
+                                  "n_best_size", "max_answer_length", "null_score_diff_threshold",
+                                  "weight_decay", "learning_rate", "adam_epsilon")
 
         # prepare model
         model = get_model(self.hparams.model_type, self.hparams.model_name_or_path)
         self.model = model
-        self.do_lower_case = True if "uncased" in self.hparams.model_name_or_path else False
+        if ("uncased" in self.hparams.model_name_or_path) or (self.hparams.model_type in ["albert", "electra"]):
+            self.do_lower_case = True
+        else:
+            self.do_lower_case = False
 
         # for processing Impossible Question
         self.version_2_with_negative = is_squad_version_2(self.hparams.data_name)
@@ -156,7 +157,6 @@ class QuestionAnswering(pl.LightningModule):
 
             # Some models (XLNet, XLM) use 5 arguments for their predictions, while the other "simpler"
             # models only use two.
-            from transformers.data.processors.squad import SquadResult
             if "cls_logits" in list(outputs[0].keys()):
                 result = SquadResult(
                     unique_id,
@@ -186,7 +186,6 @@ class QuestionAnswering(pl.LightningModule):
             start_n_top = self.model.config.start_n_top if hasattr(self.model, "config") else self.model.module.config.start_n_top
             end_n_top = self.model.config.end_n_top if hasattr(self.model, "config") else self.model.module.config.end_n_top
 
-            from transformers.data.metrics.squad_metrics import compute_predictions_log_probs
             predictions = compute_predictions_log_probs(
                 examples,
                 features,
@@ -203,7 +202,6 @@ class QuestionAnswering(pl.LightningModule):
                 False # Not want to do verbose logging
             )
         else:
-            from transformers.data.metrics.squad_metrics import compute_predictions_logits
             predictions = compute_predictions_logits(
                 examples,
                 features,
@@ -221,7 +219,6 @@ class QuestionAnswering(pl.LightningModule):
             )
 
         # Compute the F1 and exact scores.
-        from transformers.data.metrics.squad_metrics import squad_evaluate
         results = squad_evaluate(examples, predictions)
 
         result_file = os.path.join(self.trainer.checkpoint_callback.dirpath, "result.json")
@@ -235,11 +232,11 @@ class QuestionAnswering(pl.LightningModule):
         no_decay = ['bias', 'LayerNorm.weight']
         optimizer_grouped_parameters = [
             {'params': [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
-             'weight_decay': 0.0},
+             'weight_decay': self.hparams.weight_decay},
             {'params': [p for n, p in self.model.named_parameters() if any(nd in n for nd in no_decay)],
              'weight_decay': 0.0}
         ]
-        optimizer = AdamW(optimizer_grouped_parameters, lr=self.hparams.learning_rate, eps=1e-8)
+        optimizer = AdamW(optimizer_grouped_parameters, lr=self.hparams.learning_rate, eps=self.hparams.adam_epsilon)
 
         t_total = len(self.train_dataloader()) // self.trainer.max_epochs
         scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, num_training_steps=t_total)
@@ -248,8 +245,34 @@ class QuestionAnswering(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser):
-        parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
-        return parser
+        parser = parent_parser.add_argument_group("Question Answering")
+
+        parser.add_argument("--null_score_diff_threshold", default=0.0, type=float,
+                            help="If null_score - best_non_null is greater than the threshold predict null.")
+        parser.add_argument("--max_seq_length", default=384, type=int,
+                            help="The maximum total input sequence length after WordPiece tokenization."
+                                 "Sequences longer than this will be truncated, and sequences shorter than this will be padded.")
+        parser.add_argument("--doc_stride", default=128, type=int,
+                            help="When splitting up a long document into chunks, how much stride to take between chunks.")
+        parser.add_argument("--max_query_length", default=64, type=int,
+                            help="The maximum number of tokens for the question."
+                                 "Questions longer than this will be truncated to this length.")
+        parser.add_argument("--weight_decay", default=0.01, type=float,
+                            help="The weight decay to apply (if not zero) to all layers except all bias and "
+                                 "LayerNorm weights in AdamW optimizer of huggingface transformers.")
+        parser.add_argument("--adam_epsilon", default=1e-8, type=float,
+                            help="The epsilon hyperparameter for AdamW optimizer of huggingface transformers.")
+        parser.add_argument('--learning_rate', default=3e-5, type=float,
+                            help="Optimizer for learning rate.")
+        parser.add_argument("--n_best_size", default=20, type=int,
+                            help="The total number of n-best predictions to generate in the nbest_predictions.json output file.")
+        parser.add_argument("--max_answer_length", default=30, type=int,
+                            help="The maximum length of an answer that can be generated."
+                                 "This is needed because the start and end predictions are not conditioned on one another.")
+        parser.add_argument("--lang_id", default=0, type=int,
+                            help="language id of input for language-specific xlm models (see tokenization_xlm.PRETRAINED_INIT_CONFIGURATION)")
+
+        return parent_parser
 
 
 def main():
@@ -265,34 +288,14 @@ def main():
     # Other parameters
     parser.add_argument("--data_name", default="squad_v2.0", type=str,
                         help="Data Name selected in the list: " + ", ".join(DATA_NAMES))
-    parser.add_argument("--null_score_diff_threshold", type=float, default=0.0,
-                        help="If null_score - best_non_null is greater than the threshold predict null.")
-    parser.add_argument("--max_seq_length", default=384, type=int,
-                        help="The maximum total input sequence length after WordPiece tokenization. Sequences "
-                             "longer than this will be truncated, and sequences shorter than this will be padded.")
-    parser.add_argument("--doc_stride", default=128, type=int,
-                        help="When splitting up a long document into chunks, how much stride to take between chunks.")
-    parser.add_argument("--max_query_length", default=64, type=int,
-                        help="The maximum number of tokens for the question. Questions longer than this will "
-                             "be truncated to this length.")
 
     parser.add_argument("--do_train", action="store_true", help="Whether to run training.")
     parser.add_argument("--do_eval", action="store_true", help="Whether to run eval on the dev set.")
 
     parser.add_argument("--num_train_epochs", default=3, type=int, help="Epochs at train time.")
     parser.add_argument("--batch_size", default=32, type=int, help="batch size")
-    parser.add_argument("--gpu_ids", type=str, default="0",
+    parser.add_argument("--gpu_ids", default="0", type=str,
                         help="gpu device ids. e.g.) `0` : GPU 0, `0,3` : GPU 0 and 3")
-    parser.add_argument('--learning_rate', type=float, default=3e-5, help="learning_rate")
-
-    parser.add_argument("--n_best_size", default=20, type=int,
-                        help="The total number of n-best predictions to generate in the nbest_predictions.json output file.")
-    parser.add_argument("--max_answer_length", default=30, type=int,
-                        help="The maximum length of an answer that can be generated. This is needed because the start "
-                             "and end predictions are not conditioned on one another.")
-
-    parser.add_argument("--lang_id", default=0, type=int,
-                        help="language id of input for language-specific xlm models (see tokenization_xlm.PRETRAINED_INIT_CONFIGURATION)")
 
     parser.add_argument("--seed", default=42, type=int, help="Seed Number")
 
@@ -301,19 +304,21 @@ def main():
     args = parser.parse_args()
     # ------------------------------------------------------------------------------------------------------------------
 
-    pl.seed_everything(args.seed)  # set seed
+    # Set seed
+    pl.seed_everything(args.seed)
 
-    # Validation For "doc_stride" Arg ----------------------------------------------------------------------------------
+    # Validation for "doc_stride" Arg ----------------------------------------------------------------------------------
     if args.doc_stride >= args.max_seq_length - args.max_query_length:
         print("WARNING - You've set a doc stride which may be superior to the document length in some "
               "examples. This could result in errors when building features from the examples. Please reduce the doc "
               "stride or increase the maximum length to ensure the features are correctly built.")
 
     # Dataset ----------------------------------------------------------------------------------------------------------
-    from dataset import QuestionAnswering_Data_Module
     args.model_type = args.model_type.lower()
-    dm = QuestionAnswering_Data_Module(args.data_name, args.model_type, args.model_name_or_path,
-                                       args.max_seq_length, args.doc_stride, args.max_query_length, args.batch_size)
+    args.model_name_or_path = args.model_name_or_path.lower()
+    args.data_name = args.data_name.lower()
+
+    dm = QuestionAnsweringDataModule(args)
     dm.prepare_data()
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -343,8 +348,7 @@ def main():
 
     # Do train !
     if args.do_train:
-        model = QuestionAnswering(args.data_name, args.model_type, args.model_name_or_path, args.lang_id,
-                                  args.n_best_size, args.max_answer_length, args.null_score_diff_threshold, args.learning_rate)
+        model = QuestionAnswering(**vars(args))
         dm.setup('fit')
         trainer.fit(model, dm)
 
@@ -356,7 +360,7 @@ def main():
         best_fn = sorted(model_files, key=lambda fn: fn.split("=")[-1])[0]
         print("[Evaluation] Best Model File name is {}".format(best_fn))
 
-        model = QuestionAnswering.load_from_checkpoint(best_fn)
+        model = QuestionAnswering.load_from_checkpoint(best_fn, **vars(args))
         dm.setup('test')
         trainer.test(model, datamodule=dm)
 

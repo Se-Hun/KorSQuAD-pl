@@ -1,13 +1,18 @@
 import os
+from typing import Optional, Union, Dict
+from argparse import Namespace
+
+from transformers import squad_convert_examples_to_features
+from transformers.data.processors.squad import SquadV1Processor, SquadV2Processor
 
 import torch
 from torch.utils.data import DataLoader
 import pytorch_lightning as pl
 
-from transformers import squad_convert_examples_to_features
-from transformers.data.processors.squad import SquadV1Processor, SquadV2Processor
+from utils.models import get_tokenizer
 
 DATA_NAMES = ["squad_v1.1", "korquad_v1.0", "squad_v2.0", "korquad_v2.0"]
+
 
 # Data Utils -----------------------------------------------------------------------------------------------------------
 def is_squad_version_2(data_name):
@@ -20,42 +25,39 @@ def is_squad_version_2(data_name):
 
 
 # Data Module ----------------------------------------------------------------------------------------------------------
-class QuestionAnswering_Data_Module(pl.LightningDataModule):
-    def __init__(self,
-                 data_name,
-                 model_type,
-                 model_name_or_path,
-                 max_seq_length,
-                 doc_stride,
-                 max_query_length,
-                 batch_size):
-
+class QuestionAnsweringDataModule(pl.LightningDataModule):
+    def __init__(
+        self,
+        args: Optional[Union[Dict, Namespace]] = None
+    ):
         super().__init__()
 
         # configurations
-        self.data_name = data_name
+        self.data_name = args.data_name
         if self.data_name not in DATA_NAMES:
-            raise NotImplementedError(data_name) # validation about dataset name
+            raise NotImplementedError(args.data_name)
 
-        self.model_type = model_type
-        self.model_name_or_path = model_name_or_path
-        self.do_lower_case = True if "uncased" in model_name_or_path else False
+        self.model_type = args.model_type
+        self.model_name_or_path = args.model_name_or_path
+        if ("uncased" in self.model_name_or_path) or (self.model_type in ["albert", "electra"]):
+            self.do_lower_case = True
+        else:
+            self.do_lower_case = False
 
-        self.max_seq_length = max_seq_length
-        self.doc_stride = doc_stride
-        self.max_query_length = max_query_length
+        self.max_seq_length = args.max_seq_length
+        self.doc_stride = args.doc_stride
+        self.max_query_length = args.max_query_length
 
-        self.version_2_with_negative = is_squad_version_2(self.data_name) # @ SQuAD Dataset
+        self.version_2_with_negative = is_squad_version_2(self.data_name)
 
         self.num_threads_for_features = 4
-        self.batch_size = batch_size
+        self.batch_size = args.batch_size
 
         # for balancing between CPU and GPU
         self.num_workers = 4 * torch.cuda.device_count()
 
     def prepare_data(self):
         # prepare tokenizer
-        from utils.models import get_tokenizer
         self.tokenizer = get_tokenizer(self.model_type, self.model_name_or_path, self.do_lower_case)
 
         # store data configurations
@@ -67,8 +69,7 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
             train_dataset = self.load_squad_examples(mode="train")  # Comment out this code for debugging.
             val_dataset = self.load_squad_examples(mode="dev")
 
-            self.train_dataset = train_dataset  # Comment out this code for debugging.
-            # self.train_dataset = val_dataset # Uncomment out below code for debugging.
+            self.train_dataset = train_dataset
             self.val_dataset = val_dataset
 
         # Assign test dataset for use in dataloader(s)
@@ -124,3 +125,4 @@ class QuestionAnswering_Data_Module(pl.LightningDataModule):
 
     def test_dataloader(self):
         return DataLoader(self.test_dataset, batch_size=self.batch_size, num_workers=self.num_workers)
+
