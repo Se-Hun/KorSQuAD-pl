@@ -63,6 +63,7 @@
 * `--num_train_epochs` : 훈련시의 에폭 수
 * `--batch_size` : 훈련시의 배치 크기
 * `--learning_rate` : 학습률
+* `--adam_epsilon` : AdamW 옵티마이저의 epsilon 값
 
 ```bash
 python3 run_qa.py --model_type bert \
@@ -73,7 +74,7 @@ python3 run_qa.py --model_type bert \
                   --gpu_ids 0 \
                   --max_seq_length 384 \
                   --num_train_epochs 2 \
-                  --batch_size 24 \
+                  --batch_size 16 \
                   --learning_rate 3e-5 \
                   --adam_epsilon 1e-8
 ```
