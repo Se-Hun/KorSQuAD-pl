@@ -142,7 +142,7 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 
 ### 1. KorQuAD
 | Hyper Parameter             | Value                                    | 
-| :-------------------------: | :--------------------------------------: |
+| --------------------------- | :--------------------------------------: |
 | `null_score_diff_threshold` | 0.0                                      |
 | `max_seq_length`            | 512                                      |
 | `doc_stride`                | 128                                      |
@@ -157,7 +157,7 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 
 ### 2. SQuAD
 | Hyper Parameter             | Value                                    | 
-| :-------------------------: | :--------------------------------------: |
+| --------------------------- | :--------------------------------------: |
 | `null_score_diff_threshold` | 0.0                                      |
 | `max_seq_length`            | 384                                      |
 | `doc_stride`                | 128                                      |
@@ -209,8 +209,8 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 |            | [albert-base-v2](https://huggingface.co/albert-base-v2)                                               | Base       | 79.25           | 87.34        |
 | XLNet      | [xlnet-base-cased](https://huggingface.co/xlnet-base-cased)                                           | Base       |                 |              |
 |            | [xlnet-large-cased](https://huggingface.co/xlnet-large-cased)                                         | Large      |                 |              |
-| ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator)       | Small      | 77.11           | 85.41        |
-|            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)         | Base       | 84.70           | 91.30        |
+| ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator)       | Small      | **77.11**       | **85.41**    |
+|            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)         | Base       | **84.70**       | **91.30**    |
 |            | [google/electra-large-discriminator](https://huggingface.co/google/electra-large-discriminator)       | Large      |                 |              |
 
 ### 4. SQuAD 2.0
@@ -225,8 +225,8 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 |            | [albert-base-v2](https://huggingface.co/albert-base-v2)                                               | Base       | 76.48           | 79.92        |
 | XLNet      | [xlnet-base-cased](https://huggingface.co/xlnet-base-cased)                                           | Base       |                 |              |
 |            | [xlnet-large-cased](https://huggingface.co/xlnet-large-cased)                                         | Large      |                 |              |
-| ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator)       | Small      | 70.55           | 73.64        |
-|            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)         | Base       | 78.70           | 82.17        |
+| ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator)       | Small      | **70.55**       | **73.64**    |
+|            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)         | Base       | **78.70**       | **82.17**    |
 |            | [google/electra-large-discriminator](https://huggingface.co/google/electra-large-discriminator)       | Large      |                 |              |
 
 ## TODO list
