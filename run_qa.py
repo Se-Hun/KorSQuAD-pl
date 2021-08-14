@@ -14,6 +14,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from utils.models import MODEL_CLASSES, get_model
+from metrics.evaluate_korquad_v1 import evaluate_with_hf_examples as korquad_v1_evaluate
 from dataset import QuestionAnsweringDataModule, DATA_NAMES, is_squad_version_2
 
 
@@ -122,6 +123,7 @@ class QuestionAnswering(pl.LightningModule):
                 )
 
         outputs = self(inputs)
+
         if len(list(outputs.keys())) >= 5:
             start_logits = outputs[0]
             start_top_index = outputs[1]
@@ -156,7 +158,6 @@ class QuestionAnswering(pl.LightningModule):
             unique_id = int(eval_feature.unique_id)
 
             # Some models (XLNet, XLM) use 5 arguments for their predictions, while the other "simpler"
-            # models only use two.
             if "cls_logits" in list(outputs[0].keys()):
                 result = SquadResult(
                     unique_id,
@@ -166,7 +167,7 @@ class QuestionAnswering(pl.LightningModule):
                     end_top_index=end_top_index[i],
                     cls_logits=cls_logits[i],
                 )
-
+            # Other models only use 2 arguments.
             else:
                 result = SquadResult(unique_id, start_logits[i], end_logits[i])
 
@@ -218,15 +219,21 @@ class QuestionAnswering(pl.LightningModule):
                 self.trainer.datamodule.tokenizer
             )
 
-        # Compute the F1 and exact scores.
-        results = squad_evaluate(examples, predictions)
+        # Perform evaluation about KorQuAD
+        if self.hparams.data_name == "korquad_v1.0":
+            results = korquad_v1_evaluate(examples, predictions)
+        # Perform evaluation about SQuAD
+        else:
+            results = squad_evaluate(examples, predictions)
 
+        # Dump evaluation result file
         result_file = os.path.join(self.trainer.checkpoint_callback.dirpath, "result.json")
         with open(result_file, "w", encoding="utf-8") as f:
             json.dump(results, f, ensure_ascii=False, indent=4)
             print("Result file is dumped at ", result_file)
 
         print(json.dumps(results, indent=4))
+        return
 
     def configure_optimizers(self):
         no_decay = ['bias', 'LayerNorm.weight']
@@ -354,7 +361,7 @@ def main():
 
     # Do eval !
     if args.do_eval:
-        assert (trainer.num_gpus < 2), "At test mode, use single gpu for preventing collision !"
+        assert (trainer.num_gpus < 2), "At test mode, Use single gpu for preventing collision !"
 
         model_files = glob(os.path.join(trainer.checkpoint_callback.dirpath, "*.ckpt"))
         best_fn = sorted(model_files, key=lambda fn: fn.split("=")[-1])[0]

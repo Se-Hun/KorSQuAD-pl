@@ -7,6 +7,8 @@ from transformers import (
     DistilBertTokenizer,
     AlbertForQuestionAnswering,
     AlbertTokenizer,
+    RobertaForQuestionAnswering,
+    RobertaTokenizer,
     ElectraForQuestionAnswering,
     ElectraTokenizer
 )
@@ -21,6 +23,7 @@ MODEL_CLASSES = {
     "distilkobert": (DistilBertForQuestionAnswering, get_kobert_tokenizer),
     "koelectra": (ElectraForQuestionAnswering, ElectraTokenizer),
     "albert": (AlbertForQuestionAnswering, AlbertTokenizer),
+    "roberta": (RobertaForQuestionAnswering, RobertaTokenizer),
     "xlnet": (XLNetForQuestionAnswering, XLNetTokenizer),
     "electra": (ElectraForQuestionAnswering, ElectraTokenizer)
 }

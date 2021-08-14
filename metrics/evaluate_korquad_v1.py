@@ -103,6 +103,27 @@ def evaluate(dataset, predictions):
     return {'exact_match': exact_match, 'f1': f1}
 
 
+def evaluate_with_hf_examples(examples, predictions):
+    f1 = exact_match = total = 0
+    for example in examples:
+        total += 1
+        if example.qas_id not in predictions:
+            message = 'Unanswered question ' + example.qas_id + \
+                      ' will receive score 0.'
+            print(message)
+            continue
+        ground_truths = list(map(lambda x: x['text'], example.answers))
+        prediction = predictions[example.qas_id]
+        exact_match += metric_max_over_ground_truths(
+            exact_match_score, prediction, ground_truths)
+        f1 += metric_max_over_ground_truths(
+            f1_score, prediction, ground_truths)
+
+    exact_match = 100.0 * exact_match / total
+    f1 = 100.0 * f1 / total
+    return {'exact_match': exact_match, 'f1': f1}
+
+
 def eval_during_train(args):
     expected_version = 'KorQuAD_v1.0'
 
