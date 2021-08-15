@@ -31,7 +31,7 @@
 
 ### 1. Dataset 다운로드
 
-**KorSQuAD-pl**에서 제공하는 데이터셋들은 다음과 같습니다.
+**KorSQuAD-pl**에서 지원하는 데이터셋들은 다음과 같습니다.
 
 | 데이터셋        | 링크                                                 | 
 | ------------- | --------------------------------------------------- |
@@ -111,19 +111,7 @@ python3 run_qa.py --model_type bert \
                   --adam_epsilon 1e-8
 ```
 
-
-### 4. Formal Evaluation for KorQuAD 1.0
-
-KorQuAD 1.0에 대한 공식 Evaluation Script를 사용하려면 다음과 같은 명령어를 사용합니다.
-
-(SQuAD의 Evaluation Script와 KorQuAD의 Evaluation Script가 차이가 있기 때문에 KorQuAD에 대해 정확한 평가를 하고자 한다면 반드시 다음의 명령어를 통해 평가해야합니다.)
-
-```bash
-python3 evaluate_korquad_v1.py --dataset_file ./data/korquad_v1.0/dev.json \
-                               --prediction_file ./model/korquad_v1.0/{$model_type}/predictions_eval.json
-```
-
-### 5. Tensorboard with.PyTorch Lightning
+### 4. Tensorboard with.PyTorch Lightning
 
 `./model` 폴더에 모든 Checkpoint와 Tensorboard Log 파일들을 저장하도록 해두었습니다.
 
@@ -138,7 +126,7 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 실험의 하이퍼파라미터 및 GPU 사용은 다음과 같습니다.
 
 * `small`, `base` 모델의 경우, 단일 GPU를 통해 실험 수행
-* `large` 모델의 경우, Distributed Training을 통해 실험 수행
+* `large` 모델의 경우, Distributed Training을 통해 Multi GPU 환경에서 실험 수행(구체적으로는 16GB짜리 GPU 4개를 사용)
 
 ### 1. KorQuAD
 | Hyper Parameter             | Value                                    | 
@@ -150,25 +138,25 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 | `n_best_size`               | 20                                       |
 | `max_answer_length`         | 30                                       |
 | `batch_size`                | 16(small size, base size), 4(large size) |
-| `num_train_epochs`          | 7                                        |
+| `num_train_epochs`          | 3                                        |
 | `weight_decay`              | 0.01                                     |
 | `adam_epsilon`              | 1e-6(KoELECTRA), 1e-8(others)            |
 | `learning_rate`             | 5e-5                                     |
 
 ### 2. SQuAD
-| Hyper Parameter             | Value                                    | 
-| --------------------------- | :--------------------------------------: |
-| `null_score_diff_threshold` | 0.0                                      |
-| `max_seq_length`            | 384                                      |
-| `doc_stride`                | 128                                      |
-| `max_query_length`          | 64                                       |
-| `n_best_size`               | 20                                       |
-| `max_answer_length`         | 30                                       |
-| `batch_size`                | 16(small size, base size), 4(large size) |
-| `num_train_epochs`          | 3                                        |
-| `weight_decay`              | 0.01                                     |
-| `adam_epsilon`              | 1e-6(ALBERT, ELECTRA), 1e-8(others)      |
-| `learning_rate`             | 3e-5                                     |
+| Hyper Parameter             | Value                                        | 
+| --------------------------- | :------------------------------------------: |
+| `null_score_diff_threshold` | 0.0                                          |
+| `max_seq_length`            | 384                                          |
+| `doc_stride`                | 128                                          |
+| `max_query_length`          | 64                                           |
+| `n_best_size`               | 20                                           |
+| `max_answer_length`         | 30                                           |
+| `batch_size`                | 16(small size, base size), 4(large size)     |
+| `num_train_epochs`          | 3                                            |
+| `weight_decay`              | 0.01                                         |
+| `adam_epsilon`              | 1e-6(ALBERT, RoBERTa, ELECTRA), 1e-8(others) |
+| `learning_rate`             | 3e-5                                         |
 
 
 ## Result of Experiments
@@ -176,14 +164,14 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 ### 1. KorQuAD 1.0
 | Model Type   | model_name_or_path                                                                                            | Model Size | Exact Match (%) | F1 Score (%) |
 | ------------ | ------------------------------------------------------------------------------------------------------------- | :--------: | :-------------: | :----------: |
-| BERT         | [bert-base-multilingual-cased](https://huggingface.co/bert-base-multilingual-cased)                           | Base       |            |         |
-| KoBERT       | [monologg/kobert](https://huggingface.co/monologg/kobert)                                                     | Base       |            |         |
-| DistilBERT   | [distilbert-base-multilingual-cased](https://huggingface.co/distilbert-base-multilingual-cased)               | Small      |            |         |
-| DistilKoBERT | [monologg/distilkobert](https://huggingface.co/monologg/distilkobert)                                         | Small      | 55.88           | 64.06        |
-| KoELECTRA    | [monologg/koelectra-small-v2-discriminator](https://huggingface.co/monologg/koelectra-small-v2-discriminator) | Small      | 80.51           | 86.25        |
-|              | [monologg/koelectra-base-v2-discriminator](https://huggingface.co/monologg/koelectra-base-v2-discriminator)   | Base       |            |         |
-|              | [monologg/koelectra-small-v3-discriminator](https://huggingface.co/monologg/koelectra-small-v3-discriminator) | Small      | 81.39           | 87.05        |
-|              | [monologg/koelectra-base-v3-discriminator](https://huggingface.co/monologg/koelectra-base-v3-discriminator)   | Base       |        |     |
+| BERT         | [bert-base-multilingual-cased](https://huggingface.co/bert-base-multilingual-cased)                           | Base       | 66.92           | 87.18        |
+| KoBERT       | [monologg/kobert](https://huggingface.co/monologg/kobert)                                                     | Base       | 47.73           | 75.12        |
+| DistilBERT   | [distilbert-base-multilingual-cased](https://huggingface.co/distilbert-base-multilingual-cased)               | Small      | 62.91           | 83.28        |
+| DistilKoBERT | [monologg/distilkobert](https://huggingface.co/monologg/distilkobert)                                         | Small      | 54.78           | 78.85        |
+| KoELECTRA    | [monologg/koelectra-small-v2-discriminator](https://huggingface.co/monologg/koelectra-small-v2-discriminator) | Small      | **81.45**       | 90.09        |
+|              | [monologg/koelectra-base-v2-discriminator](https://huggingface.co/monologg/koelectra-base-v2-discriminator)   | Base       | **83.94**       | 92.20        |
+|              | [monologg/koelectra-small-v3-discriminator](https://huggingface.co/monologg/koelectra-small-v3-discriminator) | Small      | 81.13           | **90.70**    |
+|              | [monologg/koelectra-base-v3-discriminator](https://huggingface.co/monologg/koelectra-base-v3-discriminator)   | Base       | 83.92           | **92.92**    |
 
 ### 2. KorQuAD 2.0 (준비중)
 | Model Type   | model_name_or_path                                                                                            | Model Size | Exact Match (%) | F1 Score (%) |
@@ -202,38 +190,38 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 | ---------- | ----------------------------------------------------------------------------------------------------- | :--------: | :-------------: | :----------: |
 | BERT       | [bert-base-cased](https://huggingface.co/bert-base-cased)                                             | Base       | 80.38           | 87.99        |
 |            | [bert-base-uncased](https://huggingface.co/bert-base-uncased)                                         | Base       | 80.03           | 87.52        |
-|            | [bert-large-uncased-whole-word-masking](https://huggingface.co/bert-large-uncased-whole-word-masking) | Large      |        |     |
+|            | [bert-large-uncased-whole-word-masking](https://huggingface.co/bert-large-uncased-whole-word-masking) | Large      | 85.51           | 91.88        |
 | DistilBERT | [distilbert-base-cased](https://huggingface.co/distilbert-base-cased)                                 | Small      | 75.94           | 84.30        |
 |            | [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased)                             | Small      | 76.72           | 84.78        |
 | ALBERT     | [albert-base-v1](https://huggingface.co/albert-base-v1)                                               | Base       | 79.46           | 87.70        |
 |            | [albert-base-v2](https://huggingface.co/albert-base-v2)                                               | Base       | 79.25           | 87.34        |
-| XLNet      | [xlnet-base-cased](https://huggingface.co/xlnet-base-cased)                                           | Base       |                 |              |
-|            | [xlnet-large-cased](https://huggingface.co/xlnet-large-cased)                                         | Large      |                 |              |
+| RoBERTa    | [roberta-base](https://huggingface.co/roberta-base)                                                   | Base       | 83.04           | 90.48        |
+|            | [roberta-large](https://huggingface.co/roberta-large)                                                 | Large      | 85.18           | 92.25        |
 | ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator)       | Small      | **77.11**       | **85.41**    |
 |            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)         | Base       | **84.70**       | **91.30**    |
-|            | [google/electra-large-discriminator](https://huggingface.co/google/electra-large-discriminator)       | Large      |                 |              |
+|            | [google/electra-large-discriminator](https://huggingface.co/google/electra-large-discriminator)       | Large      | **87.14**       | **93.41**    |
 
 ### 4. SQuAD 2.0
 | Model Type | model_name_or_path                                                                                    | Model Size | Exact Match (%) | F1 Score (%) |
 | ---------- | ----------------------------------------------------------------------------------------------------- | :--------: | :-------------: | :----------: |
 | BERT       | [bert-base-cased](https://huggingface.co/bert-base-cased)                                             | Base       | 70.52           | 73.79        |
 |            | [bert-base-uncased](https://huggingface.co/bert-base-uncased)                                         | Base       | 72.02           | 75.35        |
-|            | [bert-large-uncased-whole-word-masking](https://huggingface.co/bert-large-uncased-whole-word-masking) | Large      |            |         |
+|            | [bert-large-uncased-whole-word-masking](https://huggingface.co/bert-large-uncased-whole-word-masking) | Large      | 78.97           | 82.14        |
 | DistilBERT | [distilbert-base-cased](https://huggingface.co/distilbert-base-cased)                                 | Small      | 63.89           | 66.97        |
 |            | [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased)                             | Small      | 65.40           | 68.03        |
 | ALBERT     | [albert-base-v1](https://huggingface.co/albert-base-v1)                                               | Base       | 74.75           | 77.77        |
 |            | [albert-base-v2](https://huggingface.co/albert-base-v2)                                               | Base       | 76.48           | 79.92        |
-| XLNet      | [xlnet-base-cased](https://huggingface.co/xlnet-base-cased)                                           | Base       |                 |              |
-|            | [xlnet-large-cased](https://huggingface.co/xlnet-large-cased)                                         | Large      |                 |              |
+| RoBERTa    | [roberta-base](https://huggingface.co/roberta-base)                                                   | Base       | **78.91**       | **82.20**    |
+|            | [roberta-large](https://huggingface.co/roberta-large)                                                 | Large      | 80.83           | 84.29        |
 | ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator)       | Small      | **70.55**       | **73.64**    |
-|            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)         | Base       | **78.70**       | **82.17**    |
+|            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)         | Base       | 78.70           | 82.17        |
 |            | [google/electra-large-discriminator](https://huggingface.co/google/electra-large-discriminator)       | Large      |                 |              |
 
 ## TODO list
 
 - [ ] KorQuAD 2.0 업데이트
 - [x] 모델 추가
-- [ ] 모든 실험 결과 종합
+- [x] 모든 실험 결과 종합
 - [x] ReadME 작성
 - [ ] ReadME EN 작성
 
