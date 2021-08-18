@@ -215,7 +215,6 @@ tensorboard --logdir ./model/squad_v2.0/bert-base-uncased/
 |            | [roberta-large](https://huggingface.co/roberta-large)                                                 | Large      | 80.83           | 84.29        |
 | ELECTRA    | [google/electra-small-discriminator](https://huggingface.co/google/electra-small-discriminator)       | Small      | **70.55**       | **73.64**    |
 |            | [google/electra-base-discriminator](https://huggingface.co/google/electra-base-discriminator)         | Base       | 78.70           | 82.17        |
-|            | [google/electra-large-discriminator](https://huggingface.co/google/electra-large-discriminator)       | Large      |                 |              |
 
 ## TODO list
 
