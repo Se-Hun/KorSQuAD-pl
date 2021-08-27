@@ -219,7 +219,7 @@ Hyper parameters and GPU settings for experiments are as follows:
 
 ## TODO list
 
-- [ ] KorQuAD 2.0 업데이트
+- [ ] add KorQuAD 2.0 
 
 ## References
 
